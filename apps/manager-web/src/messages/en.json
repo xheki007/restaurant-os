@@ -1,0 +1,77 @@
+{
+  "dashboard": {
+    "title": "Management overview",
+    "subtitle": "Full control of restaurant operations in one place",
+    "branchBadge": "Main Branch \u00b7 Freiburg im Breisgau"
+  },
+  "actions": {
+    "newReservation": "New reservation",
+    "openFloor": "Open floor plan",
+    "viewAll": "View all"
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "reservations": "Reservations",
+    "floor": "Floor plan & tables",
+    "guests": "Guests",
+    "aiAssistant": "AI Assistant",
+    "settings": "Settings",
+    "managerWeb": "Manager Web"
+  },
+  "ai": {
+    "controlLayerTitle": "AI control layer",
+    "controlLayerText": "AI supports the team with suggestions, warnings, and insights. Final decisions always remain with the team.",
+    "panelTitle": "AI Assistant",
+    "panelSubtitle": "Helpful, controllable, and explainable.",
+    "riskTitle": "Seating risk",
+    "riskText": "Two bookings are close in time and affect the same capacity. Check before accepting another walk-in.",
+    "recommendationTitle": "Recommendation",
+    "recommendationText": "Seat the next 2-person reservation at Table 1 and keep the larger indoor table free for the next peak window.",
+    "whyTitle": "Why",
+    "whyText": "Based on party size, current occupancy, upcoming arrivals, and recent floor plan usage."
+  },
+  "stats": {
+    "todayReservationsTitle": "Reservations today",
+    "todayReservationsValue": "48",
+    "todayReservationsSubtitle": "6 waiting for confirmation",
+    "todayReservationsSubtitleLive": "{count} pending in the current range",
+    "occupiedTablesTitle": "Occupied tables",
+    "occupiedTablesValue": "17",
+    "occupiedTablesSubtitle": "4 currently available",
+    "occupiedTablesSubtitleLive": "{count} confirmed reservations",
+    "expectedGuestsTitle": "Expected guests",
+    "expectedGuestsValue": "126",
+    "expectedGuestsSubtitle": "Peak time around 20:00",
+    "expectedGuestsSubtitleLive": "{count} completed services",
+    "aiAlertsTitle": "AI alerts",
+    "aiAlertsValue": "3",
+    "aiAlertsSubtitle": "1 seating conflict needs review",
+    "aiAlertsSubtitleLive": "{count} cancellations in the current range"
+  },
+  "overview": {
+    "title": "Operations overview",
+    "subtitle": "Quick access to the most important actions during service.",
+    "reservationsTitle": "Reservations",
+    "reservationsText": "Review arrivals, confirmations, conflicts, and the current service flow.",
+    "floorTitle": "Floor plan",
+    "floorText": "Open live tables and manage seating visually.",
+    "guestsTitle": "Guests",
+    "guestsText": "View notes, VIP marks, preferences, and visit history.",
+    "assistantTitle": "AI Assistant",
+    "assistantText": "Review recommendations before confirming actions."
+  },
+  "reservationsPreview": {
+    "title": "Upcoming reservations",
+    "subtitle": "A clear preview of the next bookings of the day for fast operational decisions.",
+    "columns": {
+      "guest": "Guest",
+      "time": "Time",
+      "party": "Party",
+      "table": "Table",
+      "status": "Status"
+    },
+    "guestsLabel": "Guests",
+    "statusConfirmed": "Confirmed",
+    "statusPending": "Pending"
+  }
+}

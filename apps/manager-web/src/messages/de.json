@@ -1,0 +1,77 @@
+{
+  "dashboard": {
+    "title": "Verwaltungs\u00fcbersicht",
+    "subtitle": "Volle Kontrolle \u00fcber den Restaurantbetrieb an einem Ort",
+    "branchBadge": "Main Branch \u00b7 Freiburg im Breisgau"
+  },
+  "actions": {
+    "newReservation": "Neue Reservierung",
+    "openFloor": "Tischplan \u00f6ffnen",
+    "viewAll": "Alle anzeigen"
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "reservations": "Reservierungen",
+    "floor": "Saalplan & Tische",
+    "guests": "G\u00e4ste",
+    "aiAssistant": "KI-Assistent",
+    "settings": "Einstellungen",
+    "managerWeb": "Manager Web"
+  },
+  "ai": {
+    "controlLayerTitle": "KI-Kontrollschicht",
+    "controlLayerText": "Die KI unterst\u00fctzt mit Vorschl\u00e4gen, Warnungen und Einblicken. Die endg\u00fcltige Entscheidung bleibt immer beim Team.",
+    "panelTitle": "KI-Assistent",
+    "panelSubtitle": "Hilfreich, kontrollierbar und nachvollziehbar.",
+    "riskTitle": "Sitzplatzrisiko",
+    "riskText": "Zwei Buchungen liegen zeitlich nahe beieinander und betreffen dieselbe Kapazit\u00e4t. Vor einem weiteren Walk-in bitte pr\u00fcfen.",
+    "recommendationTitle": "Empfehlung",
+    "recommendationText": "Platziere die n\u00e4chste 2-Personen-Reservierung an Tisch 1 und halte den gr\u00f6\u00dferen Innenbereichstisch f\u00fcr das n\u00e4chste Sto\u00dfzeitfenster frei.",
+    "whyTitle": "Warum",
+    "whyText": "Basierend auf Gruppengr\u00f6\u00dfe, aktueller Auslastung, bevorstehenden Ank\u00fcnften und der j\u00fcngsten Nutzung des Saalplans."
+  },
+  "stats": {
+    "todayReservationsTitle": "Reservierungen heute",
+    "todayReservationsValue": "48",
+    "todayReservationsSubtitle": "6 warten auf Best\u00e4tigung",
+    "todayReservationsSubtitleLive": "{count} ausstehend im aktuellen Zeitraum",
+    "occupiedTablesTitle": "Belegte Tische",
+    "occupiedTablesValue": "17",
+    "occupiedTablesSubtitle": "4 aktuell verf\u00fcgbar",
+    "occupiedTablesSubtitleLive": "{count} best\u00e4tigte Reservierungen",
+    "expectedGuestsTitle": "Erwartete G\u00e4ste",
+    "expectedGuestsValue": "126",
+    "expectedGuestsSubtitle": "Sto\u00dfzeit gegen 20:00 Uhr",
+    "expectedGuestsSubtitleLive": "{count} abgeschlossene Services",
+    "aiAlertsTitle": "KI-Hinweise",
+    "aiAlertsValue": "3",
+    "aiAlertsSubtitle": "1 Sitzplatzkonflikt muss gepr\u00fcft werden",
+    "aiAlertsSubtitleLive": "{count} Stornierungen im aktuellen Zeitraum"
+  },
+  "overview": {
+    "title": "Betriebs\u00fcbersicht",
+    "subtitle": "Schneller Zugriff auf die wichtigsten Aktionen w\u00e4hrend des Services.",
+    "reservationsTitle": "Reservierungen",
+    "reservationsText": "Ank\u00fcnfte, Best\u00e4tigungen, Konflikte und den aktuellen Servicefluss pr\u00fcfen.",
+    "floorTitle": "Saalplan",
+    "floorText": "Live-Tische \u00f6ffnen und Platzierungen visuell verwalten.",
+    "guestsTitle": "G\u00e4ste",
+    "guestsText": "Notizen, VIP-Markierungen, Vorlieben und Besuchshistorie ansehen.",
+    "assistantTitle": "KI-Assistent",
+    "assistantText": "Empfehlungen pr\u00fcfen, bevor Aktionen best\u00e4tigt werden."
+  },
+  "reservationsPreview": {
+    "title": "Bevorstehende Reservierungen",
+    "subtitle": "Eine klare Vorschau auf die n\u00e4chsten Buchungen des Tages f\u00fcr schnelle operative Entscheidungen.",
+    "columns": {
+      "guest": "Gast",
+      "time": "Zeit",
+      "party": "Gruppe",
+      "table": "Tisch",
+      "status": "Status"
+    },
+    "guestsLabel": "G\u00e4ste",
+    "statusConfirmed": "Best\u00e4tigt",
+    "statusPending": "Ausstehend"
+  }
+}

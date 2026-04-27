@@ -1,0 +1,77 @@
+{
+  "dashboard": {
+    "title": "Panoramica gestionale",
+    "subtitle": "Controllo completo delle operazioni del ristorante in un unico posto",
+    "branchBadge": "Main Branch · Freiburg im Breisgau"
+  },
+  "actions": {
+    "newReservation": "Nuova prenotazione",
+    "openFloor": "Apri planimetria tavoli",
+    "viewAll": "Vedi tutto"
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "reservations": "Prenotazioni",
+    "floor": "Sala e tavoli",
+    "guests": "Ospiti",
+    "aiAssistant": "Assistente AI",
+    "settings": "Impostazioni",
+    "managerWeb": "Manager Web"
+  },
+  "ai": {
+    "controlLayerTitle": "Livello di controllo AI",
+    "controlLayerText": "L'AI aiuta con suggerimenti, avvisi e analisi. La decisione finale resta sempre al team.",
+    "panelTitle": "Assistente AI",
+    "panelSubtitle": "Utile, controllabile e spiegabile.",
+    "riskTitle": "Rischio posti",
+    "riskText": "Due prenotazioni sono vicine nel tempo e incidono sulla stessa capacita. Controllare prima di accettare un altro walk-in.",
+    "recommendationTitle": "Raccomandazione",
+    "recommendationText": "Assegna la prossima prenotazione da 2 persone al Tavolo 1 e tieni libero il tavolo piu grande per la prossima fascia di punta.",
+    "whyTitle": "Perche",
+    "whyText": "Basato sulla dimensione del gruppo, occupazione attuale, arrivi previsti e uso recente della sala."
+  },
+  "stats": {
+    "todayReservationsTitle": "Prenotazioni oggi",
+    "todayReservationsValue": "48",
+    "todayReservationsSubtitle": "6 in attesa di conferma",
+    "todayReservationsSubtitleLive": "{count} in attesa nell'intervallo attuale",
+    "occupiedTablesTitle": "Tavoli occupati",
+    "occupiedTablesValue": "17",
+    "occupiedTablesSubtitle": "4 attualmente disponibili",
+    "occupiedTablesSubtitleLive": "{count} prenotazioni confermate",
+    "expectedGuestsTitle": "Ospiti attesi",
+    "expectedGuestsValue": "126",
+    "expectedGuestsSubtitle": "Ora di punta verso le 20:00",
+    "expectedGuestsSubtitleLive": "{count} servizi completati",
+    "aiAlertsTitle": "Avvisi AI",
+    "aiAlertsValue": "3",
+    "aiAlertsSubtitle": "1 conflitto posti da controllare",
+    "aiAlertsSubtitleLive": "{count} cancellazioni nell'intervallo attuale"
+  },
+  "overview": {
+    "title": "Panoramica operativa",
+    "subtitle": "Accesso rapido alle azioni principali durante il servizio.",
+    "reservationsTitle": "Prenotazioni",
+    "reservationsText": "Controlla arrivi, conferme, conflitti e flusso del servizio.",
+    "floorTitle": "Sala",
+    "floorText": "Apri i tavoli live e gestisci le assegnazioni visivamente.",
+    "guestsTitle": "Ospiti",
+    "guestsText": "Visualizza note, VIP, preferenze e storico visite.",
+    "assistantTitle": "Assistente AI",
+    "assistantText": "Controlla le raccomandazioni prima di confermare le azioni."
+  },
+  "reservationsPreview": {
+    "title": "Prenotazioni in arrivo",
+    "subtitle": "Una vista chiara delle prossime prenotazioni per decisioni operative rapide.",
+    "columns": {
+      "guest": "Ospite",
+      "time": "Ora",
+      "party": "Persone",
+      "table": "Tavolo",
+      "status": "Stato"
+    },
+    "guestsLabel": "ospiti",
+    "statusConfirmed": "Confermata",
+    "statusPending": "In attesa"
+  }
+}

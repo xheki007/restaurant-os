@@ -1,0 +1,72 @@
+import Link from "next/link";
+import {ArrowLeft, ChevronRight, Users} from "lucide-react";
+import {getTranslations, setRequestLocale} from "next-intl/server";
+
+type Props = {
+  params: Promise<{locale: string}>;
+};
+
+export default async function GuestsPage({params}: Props) {
+  const {locale} = await params;
+
+  setRequestLocale(locale);
+
+  const t = await getTranslations({locale});
+
+  return (
+    <main className="min-h-screen text-white">
+      <div className="mx-auto max-w-7xl px-6 py-8 lg:px-8">
+        <div className="space-y-6">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/60">
+                <Users className="h-3.5 w-3.5" />
+                {t("sidebar.guests")}
+              </div>
+
+              <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white lg:text-5xl">
+                {t("sidebar.guests")}
+              </h1>
+
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-white/60 lg:text-base">
+                Guest profiles, visit history and CRM view will live here.
+              </p>
+            </div>
+
+            <Link
+              href={`/${locale}/dashboard`}
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-medium text-white transition hover:bg-white/10"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to dashboard
+            </Link>
+          </div>
+
+          <div className="rounded-[32px] border border-white/10 bg-white/5 p-6 shadow-[0_10px_35px_rgba(0,0,0,0.22)]">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-lg font-semibold text-white">Guest CRM</h2>
+                <p className="mt-1 text-sm text-white/50">
+                  This page is now connected and ready for the next build phase.
+                </p>
+              </div>
+
+              <Link
+                href={`/${locale}/reservations`}
+                className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/75 transition hover:bg-white/10 hover:text-white"
+              >
+                Open reservations
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+            </div>
+
+            <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 px-4 py-5 text-sm text-white/60">
+              Placeholder page created successfully. Next step later will be:
+              guest list, guest details, visit history, tags and notes.
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}

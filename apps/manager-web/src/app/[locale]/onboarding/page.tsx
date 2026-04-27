@@ -1,0 +1,681 @@
+"use client";
+
+import { useState } from "react";
+
+const API_BASE_URL = "http://localhost:3002";
+
+export default function OnboardingPage() {
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
+  const [createdResult, setCreatedResult] = useState<null | {
+    tenant?: { id?: string; name?: string; slug?: string };
+    restaurant?: { id?: string; name?: string };
+    branch?: { id?: string; name?: string; code?: string };
+    adminUser?: { id?: string; email?: string };
+    adminRole?: { id?: string; code?: string; name?: string };
+  }>(null);
+
+  const [form, setForm] = useState({
+    tenantName: "",
+    tenantSlug: "",
+    timezone: "Europe/Belgrade",
+    defaultLanguage: "de",
+    currency: "EUR",
+
+    restaurantName: "",
+    legalName: "",
+    phone: "",
+    email: "",
+    website: "",
+    description: "",
+
+    branchName: "Main Branch",
+    branchCode: "MAIN",
+    addressLine1: "",
+    addressLine2: "",
+    city: "",
+    postalCode: "",
+    country: "",
+    branchPhone: "",
+    branchEmail: "",
+
+    defaultReservationDurationMin: 90,
+    maxPartySize: 10,
+    allowOnlineBooking: true,
+    allowWalkIns: true,
+    allowPhoneReservations: true,
+    requireGuestPhone: true,
+    requireGuestEmail: false,
+    reservationLeadTimeMin: 30,
+    reservationCutoffMin: 30,
+
+    adminFullName: "",
+    adminEmail: "",
+    adminPassword: ""
+  });
+
+  function setField(name: string, value: string | number | boolean) {
+    setForm((prev) => ({
+      ...prev,
+      [name]: value
+    }));
+  }
+
+  function autoSlug(value: string) {
+    return String(value || "")
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  }
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setLoading(true);
+    setSuccess("");
+    setError("");
+    setCreatedResult(null);
+
+    try {
+      const response = await fetch(API_BASE_URL + "/onboarding", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(form)
+      });
+
+      const json = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(
+          Array.isArray(json?.message)
+            ? json.message.join(", ")
+            : json?.message || "Onboarding failed"
+        );
+      }
+
+      setCreatedResult(json);
+      setSuccess(
+        "Tenant created successfully. The new tenant starts empty. Tables, zones and layout must be created later in Floor Plan Editor."
+      );
+
+      setTimeout(() => {
+        if (json?.tenant?.slug) {
+          window.location.href = "/login?tenant=" + encodeURIComponent(json.tenant.slug);
+        }
+      }, 1500);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Onboarding failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <main style={pageStyle}>
+      <div style={shellStyle}>
+        <div style={heroStyle}>
+          <div>
+            <div style={eyebrowStyle}>Enterprise setup</div>
+            <h1 style={titleStyle}>Create tenant</h1>
+            <p style={subtitleStyle}>
+              Create tenant, restaurant, branch, booking defaults and the first admin account in one place.
+              New tenants start empty. Tables, zones, labels and floor layout are created later by the restaurant team.
+            </p>
+          </div>
+        </div>
+
+        {success ? (
+          <div style={successStyle}>
+            <div style={{ fontWeight: 700, marginBottom: "8px" }}>{success}</div>
+
+            {createdResult ? (
+              <div style={successDetailsStyle}>
+                <div><strong>Tenant:</strong> {createdResult.tenant?.name || "-"}</div>
+                <div><strong>Tenant slug:</strong> {createdResult.tenant?.slug || "-"}</div>
+                <div><strong>Branch:</strong> {createdResult.branch?.name || "-"}</div>
+                <div><strong>Branch code:</strong> {createdResult.branch?.code || "-"}</div>
+                <div><strong>Branch ID:</strong> {createdResult.branch?.id || "-"}</div>
+                <div><strong>Admin email:</strong> {createdResult.adminUser?.email || "-"}</div>
+                <div><strong>Admin role:</strong> {createdResult.adminRole?.name || "-"}</div>
+              </div>
+            ) : null}
+
+            <div style={successNextStyle}>
+              Next steps: you will be redirected to login with the tenant slug prefilled. After login, adjust business hours and create zones, tables and layout in Floor Plan Editor.
+            </div>
+          </div>
+        ) : null}
+
+        {error ? <div style={errorStyle}>{error}</div> : null}
+
+        <form onSubmit={handleSubmit} style={formWrapStyle}>
+          <section style={cardStyle}>
+            <div style={sectionTitleStyle}>Tenant</div>
+            <div style={grid2Style}>
+              <div style={fieldStyle}>
+                <label style={labelStyle}>Tenant name</label>
+                <input
+                  value={form.tenantName}
+                  onChange={(e) => {
+                    setField("tenantName", e.target.value);
+                    if (!form.tenantSlug) {
+                      setField("tenantSlug", autoSlug(e.target.value));
+                    }
+                  }}
+                  style={inputStyle}
+                />
+              </div>
+
+              <div style={fieldStyle}>
+                <label style={labelStyle}>Tenant slug</label>
+                <input
+                  value={form.tenantSlug}
+                  onChange={(e) => setField("tenantSlug", autoSlug(e.target.value))}
+                  style={inputStyle}
+                />
+              </div>
+
+              <div style={fieldStyle}>
+                <label style={labelStyle}>Timezone</label>
+                <input
+                  value={form.timezone}
+                  onChange={(e) => setField("timezone", e.target.value)}
+                  style={inputStyle}
+                />
+              </div>
+
+              <div style={fieldStyle}>
+                <label style={labelStyle}>Default language</label>
+                <select
+                  value={form.defaultLanguage}
+                  onChange={(e) => setField("defaultLanguage", e.target.value)}
+                  style={inputStyle}
+                >
+                  <option value="de">German</option>
+                  <option value="en">English</option>
+                  <option value="sq">Albanian</option>
+                  <option value="it">Italian</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <section style={cardStyle}>
+            <div style={sectionTitleStyle}>Restaurant</div>
+            <div style={grid2Style}>
+              <div style={fieldStyle}>
+                <label style={labelStyle}>Restaurant name</label>
+                <input
+                  value={form.restaurantName}
+                  onChange={(e) => setField("restaurantName", e.target.value)}
+                  style={inputStyle}
+                />
+              </div>
+
+              <div style={fieldStyle}>
+                <label style={labelStyle}>Legal name</label>
+                <input
+                  value={form.legalName}
+                  onChange={(e) => setField("legalName", e.target.value)}
+                  style={inputStyle}
+                />
+              </div>
+
+              <div style={fieldStyle}>
+                <label style={labelStyle}>Restaurant email</label>
+                <input
+                  value={form.email}
+                  onChange={(e) => setField("email", e.target.value)}
+                  style={inputStyle}
+                />
+              </div>
+
+              <div style={fieldStyle}>
+                <label style={labelStyle}>Restaurant phone</label>
+                <input
+                  value={form.phone}
+                  onChange={(e) => setField("phone", e.target.value)}
+                  style={inputStyle}
+                />
+              </div>
+
+              <div style={fieldStyle}>
+                <label style={labelStyle}>Website</label>
+                <input
+                  value={form.website}
+                  onChange={(e) => setField("website", e.target.value)}
+                  style={inputStyle}
+                />
+              </div>
+            </div>
+
+            <div style={fieldStyle}>
+              <label style={labelStyle}>Description</label>
+              <textarea
+                value={form.description}
+                onChange={(e) => setField("description", e.target.value)}
+                style={textAreaStyle}
+              />
+            </div>
+          </section>
+
+          <section style={cardStyle}>
+            <div style={sectionTitleStyle}>Main branch</div>
+            <div style={grid2Style}>
+              <div style={fieldStyle}>
+                <label style={labelStyle}>Branch name</label>
+                <input
+                  value={form.branchName}
+                  onChange={(e) => setField("branchName", e.target.value)}
+                  style={inputStyle}
+                />
+              </div>
+
+              <div style={fieldStyle}>
+                <label style={labelStyle}>Branch code</label>
+                <input
+                  value={form.branchCode}
+                  onChange={(e) => setField("branchCode", e.target.value.toUpperCase())}
+                  style={inputStyle}
+                />
+              </div>
+
+              <div style={fieldStyle}>
+                <label style={labelStyle}>Address line 1</label>
+                <input
+                  value={form.addressLine1}
+                  onChange={(e) => setField("addressLine1", e.target.value)}
+                  style={inputStyle}
+                />
+              </div>
+
+              <div style={fieldStyle}>
+                <label style={labelStyle}>Address line 2</label>
+                <input
+                  value={form.addressLine2}
+                  onChange={(e) => setField("addressLine2", e.target.value)}
+                  style={inputStyle}
+                />
+              </div>
+
+              <div style={fieldStyle}>
+                <label style={labelStyle}>City</label>
+                <input
+                  value={form.city}
+                  onChange={(e) => setField("city", e.target.value)}
+                  style={inputStyle}
+                />
+              </div>
+
+              <div style={fieldStyle}>
+                <label style={labelStyle}>Postal code</label>
+                <input
+                  value={form.postalCode}
+                  onChange={(e) => setField("postalCode", e.target.value)}
+                  style={inputStyle}
+                />
+              </div>
+
+              <div style={fieldStyle}>
+                <label style={labelStyle}>Country</label>
+                <input
+                  value={form.country}
+                  onChange={(e) => setField("country", e.target.value)}
+                  style={inputStyle}
+                />
+              </div>
+
+              <div style={fieldStyle}>
+                <label style={labelStyle}>Currency</label>
+                <input
+                  value={form.currency}
+                  onChange={(e) => setField("currency", e.target.value)}
+                  style={inputStyle}
+                />
+              </div>
+
+              <div style={fieldStyle}>
+                <label style={labelStyle}>Branch phone</label>
+                <input
+                  value={form.branchPhone}
+                  onChange={(e) => setField("branchPhone", e.target.value)}
+                  style={inputStyle}
+                />
+              </div>
+
+              <div style={fieldStyle}>
+                <label style={labelStyle}>Branch email</label>
+                <input
+                  value={form.branchEmail}
+                  onChange={(e) => setField("branchEmail", e.target.value)}
+                  style={inputStyle}
+                />
+              </div>
+            </div>
+          </section>
+
+          <section style={cardStyle}>
+            <div style={sectionTitleStyle}>Booking defaults</div>
+            <div style={grid2Style}>
+              <div style={fieldStyle}>
+                <label style={labelStyle}>Reservation duration (min)</label>
+                <input
+                  type="number"
+                  value={form.defaultReservationDurationMin}
+                  onChange={(e) => setField("defaultReservationDurationMin", Number(e.target.value))}
+                  style={inputStyle}
+                />
+              </div>
+
+              <div style={fieldStyle}>
+                <label style={labelStyle}>Max party size</label>
+                <input
+                  type="number"
+                  value={form.maxPartySize}
+                  onChange={(e) => setField("maxPartySize", Number(e.target.value))}
+                  style={inputStyle}
+                />
+              </div>
+
+              <div style={fieldStyle}>
+                <label style={labelStyle}>Lead time (min)</label>
+                <input
+                  type="number"
+                  value={form.reservationLeadTimeMin}
+                  onChange={(e) => setField("reservationLeadTimeMin", Number(e.target.value))}
+                  style={inputStyle}
+                />
+              </div>
+
+              <div style={fieldStyle}>
+                <label style={labelStyle}>Cutoff (min)</label>
+                <input
+                  type="number"
+                  value={form.reservationCutoffMin}
+                  onChange={(e) => setField("reservationCutoffMin", Number(e.target.value))}
+                  style={inputStyle}
+                />
+              </div>
+            </div>
+
+            <div style={toggleGridStyle}>
+              <label style={toggleStyle}>
+                <input
+                  type="checkbox"
+                  checked={form.allowOnlineBooking}
+                  onChange={(e) => setField("allowOnlineBooking", e.target.checked)}
+                />
+                <span>Allow online booking</span>
+              </label>
+
+              <label style={toggleStyle}>
+                <input
+                  type="checkbox"
+                  checked={form.allowWalkIns}
+                  onChange={(e) => setField("allowWalkIns", e.target.checked)}
+                />
+                <span>Allow walk-ins</span>
+              </label>
+
+              <label style={toggleStyle}>
+                <input
+                  type="checkbox"
+                  checked={form.allowPhoneReservations}
+                  onChange={(e) => setField("allowPhoneReservations", e.target.checked)}
+                />
+                <span>Allow phone reservations</span>
+              </label>
+
+              <label style={toggleStyle}>
+                <input
+                  type="checkbox"
+                  checked={form.requireGuestPhone}
+                  onChange={(e) => setField("requireGuestPhone", e.target.checked)}
+                />
+                <span>Require guest phone</span>
+              </label>
+
+              <label style={toggleStyle}>
+                <input
+                  type="checkbox"
+                  checked={form.requireGuestEmail}
+                  onChange={(e) => setField("requireGuestEmail", e.target.checked)}
+                />
+                <span>Require guest email</span>
+              </label>
+            </div>
+
+            <div style={noteStyle}>
+              Default business hours will be created automatically for all 7 days.
+              The restaurant team can adjust opening days and hours later in Settings.
+            </div>
+          </section>
+
+          <section style={cardStyle}>
+            <div style={sectionTitleStyle}>First admin user</div>
+            <div style={grid2Style}>
+              <div style={fieldStyle}>
+                <label style={labelStyle}>Admin full name</label>
+                <input
+                  value={form.adminFullName}
+                  onChange={(e) => setField("adminFullName", e.target.value)}
+                  style={inputStyle}
+                />
+              </div>
+
+              <div style={fieldStyle}>
+                <label style={labelStyle}>Admin email</label>
+                <input
+                  value={form.adminEmail}
+                  onChange={(e) => setField("adminEmail", e.target.value)}
+                  style={inputStyle}
+                />
+              </div>
+
+              <div style={{ ...fieldStyle, gridColumn: "1 / -1" }}>
+                <label style={labelStyle}>Admin password</label>
+                <input
+                  type="password"
+                  value={form.adminPassword}
+                  onChange={(e) => setField("adminPassword", e.target.value)}
+                  style={inputStyle}
+                />
+              </div>
+            </div>
+          </section>
+
+          <div style={actionsStyle}>
+            <button type="submit" disabled={loading} style={buttonStyle}>
+              {loading ? "Creating..." : "Create tenant"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </main>
+  );
+}
+
+const pageStyle: React.CSSProperties = {
+  minHeight: "100vh",
+  background: "linear-gradient(180deg,#020817 0%, #04112a 100%)",
+  color: "#ffffff",
+  padding: "32px 20px 48px"
+};
+
+const shellStyle: React.CSSProperties = {
+  width: "100%",
+  maxWidth: "1200px",
+  margin: "0 auto",
+  display: "grid",
+  gap: "20px"
+};
+
+const heroStyle: React.CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "flex-start",
+  gap: "20px",
+  flexWrap: "wrap"
+};
+
+const eyebrowStyle: React.CSSProperties = {
+  display: "inline-block",
+  padding: "7px 12px",
+  borderRadius: "999px",
+  background: "rgba(255,255,255,0.05)",
+  border: "1px solid rgba(255,255,255,0.08)",
+  color: "rgba(255,255,255,0.72)",
+  fontSize: "12px",
+  marginBottom: "14px"
+};
+
+const titleStyle: React.CSSProperties = {
+  margin: 0,
+  fontSize: "40px",
+  lineHeight: 1.05
+};
+
+const subtitleStyle: React.CSSProperties = {
+  marginTop: "14px",
+  marginBottom: 0,
+  maxWidth: "820px",
+  color: "rgba(255,255,255,0.68)",
+  lineHeight: 1.7,
+  fontSize: "15px"
+};
+
+const formWrapStyle: React.CSSProperties = {
+  display: "grid",
+  gap: "18px"
+};
+
+const cardStyle: React.CSSProperties = {
+  borderRadius: "24px",
+  border: "1px solid rgba(255,255,255,0.08)",
+  background: "linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03))",
+  padding: "22px"
+};
+
+const sectionTitleStyle: React.CSSProperties = {
+  fontSize: "22px",
+  fontWeight: 700,
+  marginBottom: "16px"
+};
+
+const grid2Style: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+  gap: "14px"
+};
+
+const fieldStyle: React.CSSProperties = {
+  display: "grid",
+  gap: "8px"
+};
+
+const labelStyle: React.CSSProperties = {
+  fontSize: "13px",
+  color: "rgba(255,255,255,0.72)"
+};
+
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  minHeight: "46px",
+  padding: "0 14px",
+  borderRadius: "14px",
+  border: "1px solid rgba(255,255,255,0.10)",
+  background: "rgba(255,255,255,0.05)",
+  color: "#ffffff",
+  outline: "none",
+  boxSizing: "border-box"
+};
+
+const textAreaStyle: React.CSSProperties = {
+  ...inputStyle,
+  minHeight: "100px",
+  paddingTop: "12px",
+  paddingBottom: "12px"
+};
+
+const toggleGridStyle: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+  gap: "12px",
+  marginTop: "16px"
+};
+
+const toggleStyle: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "10px",
+  minHeight: "46px",
+  borderRadius: "14px",
+  border: "1px solid rgba(255,255,255,0.10)",
+  background: "rgba(255,255,255,0.05)",
+  padding: "0 14px"
+};
+
+const noteStyle: React.CSSProperties = {
+  marginTop: "16px",
+  borderRadius: "14px",
+  border: "1px solid rgba(255,255,255,0.08)",
+  background: "rgba(255,255,255,0.04)",
+  padding: "12px 14px",
+  color: "rgba(255,255,255,0.72)",
+  fontSize: "13px",
+  lineHeight: 1.7
+};
+
+const actionsStyle: React.CSSProperties = {
+  display: "flex",
+  justifyContent: "flex-start"
+};
+
+const buttonStyle: React.CSSProperties = {
+  minHeight: "48px",
+  padding: "0 18px",
+  borderRadius: "14px",
+  background: "#2563eb",
+  border: "none",
+  color: "#fff",
+  fontWeight: 700,
+  cursor: "pointer"
+};
+
+const successStyle: React.CSSProperties = {
+  borderRadius: "18px",
+  border: "1px solid rgba(120,255,180,0.20)",
+  background: "rgba(60,200,120,0.10)",
+  color: "#dfffea",
+  padding: "14px 16px"
+};
+
+const errorStyle: React.CSSProperties = {
+  borderRadius: "18px",
+  border: "1px solid rgba(255,120,120,0.20)",
+  background: "rgba(255,80,80,0.10)",
+  color: "#ffd6d6",
+  padding: "14px 16px"
+};
+
+const successDetailsStyle: React.CSSProperties = {
+  marginTop: "10px",
+  paddingTop: "10px",
+  borderTop: "1px solid rgba(255,255,255,0.10)",
+  display: "grid",
+  gap: "6px",
+  fontSize: "14px",
+  lineHeight: 1.6
+};
+
+const successNextStyle: React.CSSProperties = {
+  marginTop: "12px",
+  paddingTop: "10px",
+  borderTop: "1px solid rgba(255,255,255,0.10)",
+  color: "#dfffea",
+  fontSize: "13px",
+  lineHeight: 1.7
+};

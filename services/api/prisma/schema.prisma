@@ -1,0 +1,996 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum TenantStatus {
+  ACTIVE
+  SUSPENDED
+  TRIAL
+  CANCELLED
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  PAST_DUE
+  SUSPENDED
+  CANCELLED
+}
+
+enum BillingCycle {
+  MONTHLY
+  YEARLY
+}
+
+enum ServiceType {
+  ALL_DAY
+  LUNCH
+  DINNER
+  BRUNCH
+}
+
+enum ZoneType {
+  INDOOR
+  TERRACE
+  VIP
+  BAR
+  PRIVATE_ROOM
+}
+
+enum TableShape {
+  SQUARE
+  RECTANGLE
+  ROUND
+}
+
+enum TableState {
+  AVAILABLE
+  RESERVED
+  SEATED
+  OCCUPIED
+  BLOCKED
+  CLEANING
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  SEATED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+  WAITLISTED
+}
+
+enum ReservationSource {
+  ONLINE
+  WALK_IN
+  PHONE
+  MANUAL
+}
+
+model Tenant {
+  id              String       @id @default(cuid())
+  name            String
+  slug            String       @unique
+  status          TenantStatus @default(TRIAL)
+  timezone        String
+  defaultLanguage String
+  currency        String
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  subscriptions             Subscription[]
+  restaurants               Restaurant[]
+  branches                  Branch[]
+  branchSettings            BranchSettings[]
+  businessHours             BusinessHour[]
+  dayOverrides              DayOverride[]
+  floorPlans                FloorPlan[]
+  zones                     Zone[]
+  zoneAvailabilityRules     ZoneAvailabilityRule[]
+  tables                    RestaurantTable[]
+  tableCombinations         TableCombination[]
+  tableStateLogs            TableStateLog[]
+  guests                    Guest[]
+  guestTags                 GuestTag[]
+  guestNotes                GuestNote[]
+  guestProfiles             GuestProfile[]
+  reservations              Reservation[]
+  reservationTags           ReservationTag[]
+  waitlistEntries           WaitlistEntry[]
+  bookingPolicies           BookingPolicy[]
+  bookingRules              BookingRule[]
+  capacitySnapshots         CapacitySnapshot[]
+  reservationStatusHistory  ReservationStatusHistory[]
+  reservationAssignmentLogs ReservationAssignmentLog[]
+  reviewRequests            ReviewRequest[]
+
+  @@index([status])
+}
+
+model SubscriptionPlan {
+  id                      String   @id @default(cuid())
+  code                    String   @unique
+  name                    String
+  description             String?
+  priceMonthly            Decimal  @db.Decimal(10, 2)
+  priceYearly             Decimal  @db.Decimal(10, 2)
+  maxBranches             Int
+  maxUsers                Int
+  maxReservationsPerMonth Int?
+  featuresJson            Json?
+  isActive                Boolean  @default(true)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  subscriptions Subscription[]
+
+  @@index([isActive])
+}
+
+model Subscription {
+  id           String             @id @default(cuid())
+  tenantId     String
+  planId       String
+  status       SubscriptionStatus @default(TRIAL)
+  billingCycle BillingCycle
+  startedAt    DateTime
+  endsAt       DateTime?
+  trialEndsAt  DateTime?
+  cancelledAt  DateTime?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  tenant Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  plan   SubscriptionPlan @relation(fields: [planId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, planId])
+  @@index([tenantId])
+  @@index([planId])
+  @@index([status])
+}
+
+model Restaurant {
+  id          String   @id @default(cuid())
+  tenantId    String
+  name        String
+  legalName   String?
+  logoFileId  String?
+  phone       String?
+  email       String?
+  website     String?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branches Branch[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+}
+
+model Branch {
+  id           String   @id @default(cuid())
+  tenantId     String
+  restaurantId String
+  name         String
+  code         String
+  addressLine1 String
+  addressLine2 String?
+  city         String
+  postalCode   String?
+  country      String
+  latitude     Decimal? @db.Decimal(10, 7)
+  longitude    Decimal? @db.Decimal(10, 7)
+  timezone     String
+  currency     String
+  phone        String?
+  email        String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant            Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  restaurant        Restaurant             @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  settings          BranchSettings?
+  businessHours     BusinessHour[]
+  dayOverrides      DayOverride[]
+  floorPlans        FloorPlan[]
+  zones             Zone[]
+  zoneRules         ZoneAvailabilityRule[]
+  tables            RestaurantTable[]
+  tableCombinations TableCombination[]
+  tableStateLogs    TableStateLog[]
+  reservations      Reservation[]
+  reservationTags   ReservationTag[]
+  waitlistEntries   WaitlistEntry[]
+  bookingPolicies   BookingPolicy[]
+  bookingRules      BookingRule[]
+  capacitySnapshots CapacitySnapshot[]
+  reviewRequests    ReviewRequest[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+  @@index([restaurantId])
+  @@index([isActive])
+}
+
+model BranchSettings {
+  id       String @id @default(cuid())
+  tenantId String
+  branchId String @unique
+
+  defaultReservationDurationMin Int @default(120)
+  tableTurnoverBufferMin        Int @default(15)
+
+  maxPartySize          Int  @default(12)
+  totalSeatingCapacity  Int  @default(0)
+  maxOnlineGuestsPerDay Int?
+
+  allowOnlineBooking     Boolean @default(true)
+  allowWalkIns           Boolean @default(true)
+  allowPhoneReservations Boolean @default(true)
+
+  allowIndoorOnline   Boolean @default(true)
+  allowTerraceOnline  Boolean @default(true)
+  defaultOnlineZoneId String?
+
+  requireGuestPhone Boolean @default(true)
+  requireGuestEmail Boolean @default(false)
+
+  reservationLeadTimeMin Int @default(30)
+  reservationCutoffMin   Int @default(30)
+
+  reviewDelayMinutes Int?    @default(60)
+  googleReviewLink   String?
+  emailSenderName    String?
+  emailSenderEmail   String?
+  logoUrl            String?
+
+  localeJson Json?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+}
+
+model BusinessHour {
+  id          String      @id @default(cuid())
+  tenantId    String
+  branchId    String
+  dayOfWeek   Int
+  openTime    String
+  closeTime   String
+  isClosed    Boolean     @default(false)
+  serviceType ServiceType @default(ALL_DAY)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  @@unique([branchId, dayOfWeek, serviceType])
+  @@index([tenantId])
+  @@index([branchId])
+}
+
+model DayOverride {
+  id        String   @id @default(cuid())
+  tenantId  String
+  branchId  String
+  date      DateTime
+  isClosed  Boolean  @default(false)
+  openTime  String?
+  closeTime String?
+  note      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  @@unique([branchId, date])
+  @@index([tenantId])
+  @@index([branchId])
+}
+
+model FloorPlan {
+  id           String   @id @default(cuid())
+  tenantId     String
+  branchId     String
+  name         String
+  version      Int      @default(1)
+  canvasWidth  Int      @default(1920)
+  canvasHeight Int      @default(1080)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch Branch            @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  zones  Zone[]
+  tables RestaurantTable[]
+
+  @@unique([branchId, name, version])
+  @@index([tenantId])
+  @@index([branchId])
+  @@index([isActive])
+}
+
+model Zone {
+  id          String   @id @default(cuid())
+  tenantId    String
+  branchId    String
+  floorPlanId String
+  name        String
+  code        String
+  type        ZoneType
+  color       String?
+
+  posX   Float? @default(0)
+  posY   Float? @default(0)
+  width  Float? @default(600)
+  height Float? @default(400)
+
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant                Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch                Branch                 @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  floorPlan             FloorPlan              @relation(fields: [floorPlanId], references: [id], onDelete: Cascade)
+  availabilityRules     ZoneAvailabilityRule[]
+  tables                RestaurantTable[]
+  requestedReservations Reservation[]          @relation("ReservationRequestedZone")
+  assignedReservations  Reservation[]          @relation("ReservationAssignedZone")
+  waitlistEntries       WaitlistEntry[]
+  bookingRules          BookingRule[]
+  capacitySnapshots     CapacitySnapshot[]
+
+  @@unique([branchId, code])
+  @@index([tenantId])
+  @@index([branchId])
+  @@index([floorPlanId])
+  @@index([isActive])
+}
+
+model ZoneAvailabilityRule {
+  id               String    @id @default(cuid())
+  tenantId         String
+  branchId         String
+  zoneId           String
+  ruleType         String
+  startDate        DateTime?
+  endDate          DateTime?
+  startMonth       Int?
+  endMonth         Int?
+  weatherCondition String?
+  isEnabled        Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  zone   Zone   @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([branchId])
+  @@index([zoneId])
+  @@index([isEnabled])
+}
+
+model RestaurantTable {
+  id          String     @id @default(cuid())
+  tenantId    String
+  branchId    String
+  zoneId      String
+  floorPlanId String
+  name        String
+  code        String
+  capacityMin Int
+  capacityMax Int
+  shape       TableShape
+  posX        Float?
+  posY        Float?
+  width       Float?
+  height      Float?
+  rotation    Float?
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  tenant               Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch               Branch                     @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  zone                 Zone                       @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  floorPlan            FloorPlan                  @relation(fields: [floorPlanId], references: [id], onDelete: Cascade)
+  combinationItems     TableCombinationItem[]
+  stateLogs            TableStateLog[]
+  assignedReservations Reservation[]              @relation("ReservationAssignedTable")
+  assignmentLogsOld    ReservationAssignmentLog[] @relation("ReservationAssignmentOldTable")
+  assignmentLogsNew    ReservationAssignmentLog[] @relation("ReservationAssignmentNewTable")
+  capacitySnapshots    CapacitySnapshot[]
+
+  @@unique([branchId, code])
+  @@index([tenantId])
+  @@index([branchId])
+  @@index([zoneId])
+  @@index([floorPlanId])
+  @@index([isActive])
+}
+
+model TableCombination {
+  id          String   @id @default(cuid())
+  tenantId    String
+  branchId    String
+  name        String
+  capacityMin Int
+  capacityMax Int
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant               Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch               Branch                 @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  items                TableCombinationItem[]
+  assignedReservations Reservation[]          @relation("ReservationAssignedCombination")
+
+  @@unique([branchId, name])
+  @@index([tenantId])
+  @@index([branchId])
+  @@index([isActive])
+}
+
+model TableCombinationItem {
+  id            String   @id @default(cuid())
+  combinationId String
+  tableId       String
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  combination TableCombination @relation(fields: [combinationId], references: [id], onDelete: Cascade)
+  table       RestaurantTable  @relation(fields: [tableId], references: [id], onDelete: Cascade)
+
+  @@unique([combinationId, tableId])
+  @@index([combinationId])
+  @@index([tableId])
+}
+
+model TableStateLog {
+  id         String     @id @default(cuid())
+  tenantId   String
+  branchId   String
+  tableId    String
+  state      TableState
+  sourceType String?
+  sourceId   String?
+  note       String?
+  createdAt  DateTime   @default(now())
+
+  tenant Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch Branch          @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  table  RestaurantTable @relation(fields: [tableId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([branchId])
+  @@index([tableId])
+  @@index([state])
+  @@index([createdAt])
+}
+
+model Guest {
+  id                String    @id @default(cuid())
+  tenantId          String
+  firstName         String
+  lastName          String?
+  fullName          String
+  phone             String?
+  email             String?
+  birthDate         DateTime?
+  preferredLanguage String?
+  marketingOptIn    Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  tenant          Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  profile         GuestProfile?
+  tagMaps         GuestTagMap[]
+  notes           GuestNote[]
+  reservations    Reservation[]
+  waitlistEntries WaitlistEntry[]
+  reviewRequests  ReviewRequest[]
+
+  @@unique([tenantId, fullName, phone])
+  @@index([tenantId])
+  @@index([phone])
+  @@index([email])
+}
+
+model GuestProfile {
+  id                   String    @id @default(cuid())
+  tenantId             String
+  guestId              String    @unique
+  vipLevel             String?
+  blacklistStatus      Boolean   @default(false)
+  blacklistReason      String?
+  preferredZoneId      String?
+  preferredTableId     String?
+  preferredSeatingNote String?
+  allergiesNote        String?
+  dietaryPreference    String?
+  visitCount           Int       @default(0)
+  noShowCount          Int       @default(0)
+  cancellationCount    Int       @default(0)
+  averagePartySize     Float?
+  lastVisitAt          DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  guest  Guest  @relation(fields: [guestId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([blacklistStatus])
+}
+
+model GuestTag {
+  id        String   @id @default(cuid())
+  tenantId  String
+  name      String
+  color     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant  Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tagMaps GuestTagMap[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+}
+
+model GuestTagMap {
+  id        String   @id @default(cuid())
+  guestId   String
+  tagId     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  guest Guest    @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  tag   GuestTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([guestId, tagId])
+  @@index([guestId])
+  @@index([tagId])
+}
+
+model GuestNote {
+  id           String   @id @default(cuid())
+  tenantId     String
+  guestId      String
+  authorUserId String?
+  note         String
+  visibility   String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  guest  Guest  @relation(fields: [guestId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([guestId])
+}
+
+model Reservation {
+  id                    String            @id @default(cuid())
+  tenantId              String
+  branchId              String
+  guestId               String
+  source                ReservationSource
+  status                ReservationStatus @default(PENDING)
+  partySize             Int
+  reservationDate       DateTime
+  startAt               DateTime
+  endAt                 DateTime
+  requestedZoneId       String?
+  assignedZoneId        String?
+  assignedTableId       String?
+  assignedCombinationId String?
+  occasion              String?
+  internalNote          String?
+  guestNote             String?
+  isWalkIn              Boolean           @default(false)
+  isPhoneReservation    Boolean           @default(false)
+  confirmationCode      String            @unique
+  createdByUserId       String?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  cancelledAt           DateTime?
+  seatedAt              DateTime?
+  completedAt           DateTime?
+
+  tenant                  Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch                  Branch                     @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  guest                   Guest                      @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  requestedZone           Zone?                      @relation("ReservationRequestedZone", fields: [requestedZoneId], references: [id], onDelete: SetNull)
+  assignedZone            Zone?                      @relation("ReservationAssignedZone", fields: [assignedZoneId], references: [id], onDelete: SetNull)
+  assignedTable           RestaurantTable?           @relation("ReservationAssignedTable", fields: [assignedTableId], references: [id], onDelete: SetNull)
+  assignedCombination     TableCombination?          @relation("ReservationAssignedCombination", fields: [assignedCombinationId], references: [id], onDelete: SetNull)
+  statusHistory           ReservationStatusHistory[]
+  tagMaps                 ReservationTagMap[]
+  assignmentLogs          ReservationAssignmentLog[]
+  promotedWaitlistEntries WaitlistEntry[]            @relation("WaitlistPromotedReservation")
+  reviewRequests          ReviewRequest[]
+
+  @@index([tenantId])
+  @@index([branchId])
+  @@index([guestId])
+  @@index([reservationDate])
+  @@index([startAt])
+  @@index([status])
+  @@index([requestedZoneId])
+  @@index([assignedZoneId])
+  @@index([assignedTableId])
+}
+
+model ReservationStatusHistory {
+  id              String             @id @default(cuid())
+  tenantId        String
+  reservationId   String
+  oldStatus       ReservationStatus?
+  newStatus       ReservationStatus
+  changedByUserId String?
+  reason          String?
+  createdAt       DateTime           @default(now())
+
+  tenant      Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  reservation Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([reservationId])
+  @@index([createdAt])
+}
+
+model ReservationTag {
+  id        String   @id @default(cuid())
+  tenantId  String
+  branchId  String
+  name      String
+  color     String?
+  isSystem  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant  Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch  Branch              @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  tagMaps ReservationTagMap[]
+
+  @@unique([branchId, name])
+  @@index([tenantId])
+  @@index([branchId])
+}
+
+model ReservationTagMap {
+  id            String   @id @default(cuid())
+  reservationId String
+  tagId         String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  reservation Reservation    @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  tag         ReservationTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([reservationId, tagId])
+  @@index([reservationId])
+  @@index([tagId])
+}
+
+model WaitlistEntry {
+  id                    String            @id @default(cuid())
+  tenantId              String
+  branchId              String
+  guestId               String
+  partySize             Int
+  requestedDate         DateTime
+  requestedStartAt      DateTime?
+  requestedZoneId       String?
+  status                ReservationStatus @default(WAITLISTED)
+  note                  String?
+  promotionExpiresAt    DateTime?
+  promotedReservationId String?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  tenant              Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch              Branch       @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  guest               Guest        @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  requestedZone       Zone?        @relation(fields: [requestedZoneId], references: [id], onDelete: SetNull)
+  promotedReservation Reservation? @relation("WaitlistPromotedReservation", fields: [promotedReservationId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([branchId])
+  @@index([guestId])
+  @@index([requestedDate])
+  @@index([status])
+  @@index([promotionExpiresAt])
+}
+
+model ReservationAssignmentLog {
+  id               String   @id @default(cuid())
+  tenantId         String
+  reservationId    String
+  oldTableId       String?
+  newTableId       String?
+  oldZoneId        String?
+  newZoneId        String?
+  assignedByUserId String?
+  reason           String?
+  createdAt        DateTime @default(now())
+
+  tenant      Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  reservation Reservation      @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  oldTable    RestaurantTable? @relation("ReservationAssignmentOldTable", fields: [oldTableId], references: [id], onDelete: SetNull)
+  newTable    RestaurantTable? @relation("ReservationAssignmentNewTable", fields: [newTableId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([reservationId])
+  @@index([createdAt])
+}
+
+model BookingPolicy {
+  id        String   @id @default(cuid())
+  tenantId  String
+  branchId  String
+  name      String
+  isDefault Boolean  @default(false)
+  priority  Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch Branch        @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  rules  BookingRule[]
+
+  @@unique([branchId, name])
+  @@index([tenantId])
+  @@index([branchId])
+  @@index([isActive])
+  @@index([priority])
+}
+
+model BookingRule {
+  id                 String    @id @default(cuid())
+  tenantId           String
+  branchId           String
+  policyId           String
+  ruleType           String
+  operator           String?
+  valueNumber        Float?
+  valueText          String?
+  valueJson          Json?
+  appliesToZoneId    String?
+  appliesToDayOfWeek Int?
+  startTime          String?
+  endTime            String?
+  startDate          DateTime?
+  endDate            DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  tenant        Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch        Branch        @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  policy        BookingPolicy @relation(fields: [policyId], references: [id], onDelete: Cascade)
+  appliesToZone Zone?         @relation(fields: [appliesToZoneId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([branchId])
+  @@index([policyId])
+  @@index([appliesToZoneId])
+  @@index([ruleType])
+}
+
+model CapacitySnapshot {
+  id                   String   @id @default(cuid())
+  tenantId             String
+  branchId             String
+  date                 DateTime
+  slotStartAt          DateTime
+  slotEndAt            DateTime
+  zoneId               String?
+  tableId              String?
+  totalTables          Int
+  reservedTables       Int      @default(0)
+  seatedTables         Int      @default(0)
+  blockedTables        Int      @default(0)
+  walkInReservedTables Int      @default(0)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  tenant Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch Branch           @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  zone   Zone?            @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+  table  RestaurantTable? @relation(fields: [tableId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([branchId])
+  @@index([date])
+  @@index([slotStartAt])
+  @@index([zoneId])
+  @@index([tableId])
+}
+
+enum UserStatus {
+  INVITED
+  ACTIVE
+  DISABLED
+  LOCKED
+}
+
+// ===============================
+// ACCESS CONTROL (ENTERPRISE)
+// ===============================
+
+model User {
+  id           String     @id @default(cuid())
+  tenantId     String
+  employeeId   String?
+  email        String
+  passwordHash String
+  status       UserStatus @default(ACTIVE)
+
+  lastLoginAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  roles    UserRole[]
+  sessions LoginSession[]
+
+  @@unique([tenantId, email])
+  @@index([tenantId])
+}
+
+model Role {
+  id          String  @id @default(cuid())
+  tenantId    String
+  code        String
+  name        String
+  description String?
+  isSystem    Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  permissions RolePermission[]
+  users       UserRole[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+}
+
+model Permission {
+  id          String  @id @default(cuid())
+  code        String  @unique
+  module      String
+  action      String
+  description String?
+
+  createdAt DateTime @default(now())
+
+  roles RolePermission[]
+}
+
+model RolePermission {
+  id           String @id @default(cuid())
+  roleId       String
+  permissionId String
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+}
+
+model UserRole {
+  id       String  @id @default(cuid())
+  userId   String
+  roleId   String
+  branchId String? // NULL = tenant-wide
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([roleId])
+  @@index([branchId])
+}
+
+model LoginSession {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String
+  ipAddress String?
+  userAgent String?
+  isActive  Boolean  @default(true)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isActive])
+}
+
+model SecurityEvent {
+  id        String   @id @default(cuid())
+  userId    String?
+  tenantId  String?
+  type      String
+  severity  String
+  message   String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([tenantId])
+  @@index([type])
+}
+
+model LayoutLabel {
+  id          String @id @default(cuid())
+  tenantId    String
+  branchId    String
+  floorPlanId String
+
+  text String
+  posX Float
+  posY Float
+
+  color    String @default("#111111")
+  fontSize Int    @default(22)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([branchId])
+  @@index([floorPlanId])
+}
+
+model ReviewRequest {
+  id            String @id @default(cuid())
+  tenantId      String
+  branchId      String
+  reservationId String
+  guestId       String
+
+  guestEmail String
+  guestName  String
+
+  sendAt DateTime
+  sentAt DateTime?
+
+  status       String  @default("PENDING")
+  errorMessage String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant      Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch      Branch      @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  reservation Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  guest       Guest       @relation(fields: [guestId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([branchId])
+  @@index([sendAt])
+  @@index([status])
+}

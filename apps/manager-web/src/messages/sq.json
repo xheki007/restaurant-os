@@ -1,0 +1,77 @@
+{
+  "dashboard": {
+    "title": "Paneli i menaxhimit",
+    "subtitle": "Kontroll i plote i operacioneve te restorantit ne nje vend",
+    "branchBadge": "Main Branch · Freiburg im Breisgau"
+  },
+  "actions": {
+    "newReservation": "Rezervim i ri",
+    "openFloor": "Hap planin e tavolinave",
+    "viewAll": "Shiko te gjitha"
+  },
+  "sidebar": {
+    "dashboard": "Ballina",
+    "reservations": "Rezervimet",
+    "floor": "Salla & Tavolinat",
+    "guests": "Mysafiret",
+    "aiAssistant": "Asistenti AI",
+    "settings": "Cilesimet",
+    "managerWeb": "Manager Web"
+  },
+  "ai": {
+    "controlLayerTitle": "Shtresa e kontrollit AI",
+    "controlLayerText": "AI ndihmon me sugjerime, paralajmerime dhe analiza. Vendimet perfundimtare mbeten gjithmone te stafi.",
+    "panelTitle": "Asistenti AI",
+    "panelSubtitle": "I dobishem, i kontrollueshem dhe i shpjegueshem.",
+    "riskTitle": "Rrezik ne ulje",
+    "riskText": "Dy rezervime jane afer ne kohe dhe ndikojne ne te njejten kapacitet. Kontrollo para se te pranosh nje walk-in tjeter.",
+    "recommendationTitle": "Rekomandim",
+    "recommendationText": "Vendose rezervimin e ardhshem per 2 persona te Tavolina 1 dhe mbaje te lire tavolinen me te madhe per orarin e ngarkuar.",
+    "whyTitle": "Pse",
+    "whyText": "Bazuar ne madhesine e grupit, ngarkesen aktuale, ardhjet e pritshme dhe perdorimin e fundit te planit te salles."
+  },
+  "stats": {
+    "todayReservationsTitle": "Rezervimet sot",
+    "todayReservationsValue": "48",
+    "todayReservationsSubtitle": "6 presin konfirmim",
+    "todayReservationsSubtitleLive": "{count} ne pritje ne intervalin aktual",
+    "occupiedTablesTitle": "Tavolina te zena",
+    "occupiedTablesValue": "17",
+    "occupiedTablesSubtitle": "4 aktualisht te lira",
+    "occupiedTablesSubtitleLive": "{count} rezervime te konfirmuara",
+    "expectedGuestsTitle": "Mysafire te pritur",
+    "expectedGuestsValue": "126",
+    "expectedGuestsSubtitle": "Koha me e ngarkuar rreth ores 20:00",
+    "expectedGuestsSubtitleLive": "{count} sherbime te perfunduara",
+    "aiAlertsTitle": "Njoftime AI",
+    "aiAlertsValue": "3",
+    "aiAlertsSubtitle": "1 konflikt uljeje duhet kontrolluar",
+    "aiAlertsSubtitleLive": "{count} anulime ne intervalin aktual"
+  },
+  "overview": {
+    "title": "Permbledhje operative",
+    "subtitle": "Qasje e shpejte ne veprimet kryesore gjate sherbimit.",
+    "reservationsTitle": "Rezervimet",
+    "reservationsText": "Kontrollo ardhjet, konfirmimet, konfliktet dhe rrjedhen aktuale te sherbimit.",
+    "floorTitle": "Salla",
+    "floorText": "Hap tavolinat live dhe menaxho uljet ne menyre vizuale.",
+    "guestsTitle": "Mysafiret",
+    "guestsText": "Shiko shenime, VIP, preferenca dhe historikun e vizitave.",
+    "assistantTitle": "Asistenti AI",
+    "assistantText": "Kontrollo rekomandimet para se te konfirmohen veprimet."
+  },
+  "reservationsPreview": {
+    "title": "Rezervimet ne vijim",
+    "subtitle": "Pamje e qarte e rezervimeve te ardhshme per vendime operative me te shpejta.",
+    "columns": {
+      "guest": "Mysafiri",
+      "time": "Koha",
+      "party": "Persona",
+      "table": "Tavolina",
+      "status": "Statusi"
+    },
+    "guestsLabel": "mysafire",
+    "statusConfirmed": "Konfirmuar",
+    "statusPending": "Ne pritje"
+  }
+}
