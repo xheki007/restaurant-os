@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3002";
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID || "";
 const BRANCH_ID = process.env.NEXT_PUBLIC_BRANCH_ID || "";
+const RESTAURANT_NAME = process.env.NEXT_PUBLIC_RESTAURANT_NAME || "Restaurant";
 
 type Zone = {
   id: string;
@@ -433,7 +434,7 @@ export default function ReservePage() {
               Restaurant
             </div>
             <div style={{ fontSize: "18px", fontWeight: 600 }}>
-              Your Restaurant Name
+              {RESTAURANT_NAME}
             </div>
           </div>
         </div>
