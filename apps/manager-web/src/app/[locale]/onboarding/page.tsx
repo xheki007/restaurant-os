@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 const API_BASE_URL = "http://localhost:3002";
 
 export default function OnboardingPage() {
+  const t = useTranslations("onboardingPage");
+
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
@@ -92,14 +95,12 @@ export default function OnboardingPage() {
         throw new Error(
           Array.isArray(json?.message)
             ? json.message.join(", ")
-            : json?.message || "Onboarding failed"
+            : json?.message || t("failed")
         );
       }
 
       setCreatedResult(json);
-      setSuccess(
-        "Tenant created successfully. The new tenant starts empty. Tables, zones and layout must be created later in Floor Plan Editor."
-      );
+      setSuccess(t("success"));
 
       setTimeout(() => {
         if (json?.tenant?.slug) {
@@ -107,7 +108,7 @@ export default function OnboardingPage() {
         }
       }, 1500);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Onboarding failed");
+      setError(err instanceof Error ? err.message : t("failed"));
     } finally {
       setLoading(false);
     }
@@ -118,11 +119,10 @@ export default function OnboardingPage() {
       <div style={shellStyle}>
         <div style={heroStyle}>
           <div>
-            <div style={eyebrowStyle}>Enterprise setup</div>
-            <h1 style={titleStyle}>Create tenant</h1>
+            <div style={eyebrowStyle}>{t("eyebrow")}</div>
+            <h1 style={titleStyle}>{t("title")}</h1>
             <p style={subtitleStyle}>
-              Create tenant, restaurant, branch, booking defaults and the first admin account in one place.
-              New tenants start empty. Tables, zones, labels and floor layout are created later by the restaurant team.
+              {t("subtitle")}
             </p>
           </div>
         </div>
@@ -133,18 +133,18 @@ export default function OnboardingPage() {
 
             {createdResult ? (
               <div style={successDetailsStyle}>
-                <div><strong>Tenant:</strong> {createdResult.tenant?.name || "-"}</div>
-                <div><strong>Tenant slug:</strong> {createdResult.tenant?.slug || "-"}</div>
-                <div><strong>Branch:</strong> {createdResult.branch?.name || "-"}</div>
-                <div><strong>Branch code:</strong> {createdResult.branch?.code || "-"}</div>
-                <div><strong>Branch ID:</strong> {createdResult.branch?.id || "-"}</div>
-                <div><strong>Admin email:</strong> {createdResult.adminUser?.email || "-"}</div>
-                <div><strong>Admin role:</strong> {createdResult.adminRole?.name || "-"}</div>
+                <div><strong>{t("result.tenant")}:</strong> {createdResult.tenant?.name || "-"}</div>
+                <div><strong>{t("result.tenantSlug")}:</strong> {createdResult.tenant?.slug || "-"}</div>
+                <div><strong>{t("result.branch")}:</strong> {createdResult.branch?.name || "-"}</div>
+                <div><strong>{t("result.branchCode")}:</strong> {createdResult.branch?.code || "-"}</div>
+                <div><strong>{t("result.branchId")}:</strong> {createdResult.branch?.id || "-"}</div>
+                <div><strong>{t("result.adminEmail")}:</strong> {createdResult.adminUser?.email || "-"}</div>
+                <div><strong>{t("result.adminRole")}:</strong> {createdResult.adminRole?.name || "-"}</div>
               </div>
             ) : null}
 
             <div style={successNextStyle}>
-              Next steps: you will be redirected to login with the tenant slug prefilled. After login, adjust business hours and create zones, tables and layout in Floor Plan Editor.
+              {t("nextSteps")}
             </div>
           </div>
         ) : null}
@@ -153,10 +153,10 @@ export default function OnboardingPage() {
 
         <form onSubmit={handleSubmit} style={formWrapStyle}>
           <section style={cardStyle}>
-            <div style={sectionTitleStyle}>Tenant</div>
+            <div style={sectionTitleStyle}>{t("sections.tenant")}</div>
             <div style={grid2Style}>
               <div style={fieldStyle}>
-                <label style={labelStyle}>Tenant name</label>
+                <label style={labelStyle}>{t("fields.tenantName")}</label>
                 <input
                   value={form.tenantName}
                   onChange={(e) => {
@@ -170,7 +170,7 @@ export default function OnboardingPage() {
               </div>
 
               <div style={fieldStyle}>
-                <label style={labelStyle}>Tenant slug</label>
+                <label style={labelStyle}>{t("fields.tenantSlug")}</label>
                 <input
                   value={form.tenantSlug}
                   onChange={(e) => setField("tenantSlug", autoSlug(e.target.value))}
@@ -179,7 +179,7 @@ export default function OnboardingPage() {
               </div>
 
               <div style={fieldStyle}>
-                <label style={labelStyle}>Timezone</label>
+                <label style={labelStyle}>{t("fields.timezone")}</label>
                 <input
                   value={form.timezone}
                   onChange={(e) => setField("timezone", e.target.value)}
@@ -188,26 +188,26 @@ export default function OnboardingPage() {
               </div>
 
               <div style={fieldStyle}>
-                <label style={labelStyle}>Default language</label>
+                <label style={labelStyle}>{t("fields.defaultLanguage")}</label>
                 <select
                   value={form.defaultLanguage}
                   onChange={(e) => setField("defaultLanguage", e.target.value)}
                   style={inputStyle}
                 >
-                  <option value="de">German</option>
-                  <option value="en">English</option>
-                  <option value="sq">Albanian</option>
-                  <option value="it">Italian</option>
+                  <option value="de">{t("languageOptions.de")}</option>
+                  <option value="en">{t("languageOptions.en")}</option>
+                  <option value="sq">{t("languageOptions.sq")}</option>
+                  <option value="it">{t("languageOptions.it")}</option>
                 </select>
               </div>
             </div>
           </section>
 
           <section style={cardStyle}>
-            <div style={sectionTitleStyle}>Restaurant</div>
+            <div style={sectionTitleStyle}>{t("sections.restaurant")}</div>
             <div style={grid2Style}>
               <div style={fieldStyle}>
-                <label style={labelStyle}>Restaurant name</label>
+                <label style={labelStyle}>{t("fields.restaurantName")}</label>
                 <input
                   value={form.restaurantName}
                   onChange={(e) => setField("restaurantName", e.target.value)}
@@ -216,7 +216,7 @@ export default function OnboardingPage() {
               </div>
 
               <div style={fieldStyle}>
-                <label style={labelStyle}>Legal name</label>
+                <label style={labelStyle}>{t("fields.legalName")}</label>
                 <input
                   value={form.legalName}
                   onChange={(e) => setField("legalName", e.target.value)}
@@ -225,7 +225,7 @@ export default function OnboardingPage() {
               </div>
 
               <div style={fieldStyle}>
-                <label style={labelStyle}>Restaurant email</label>
+                <label style={labelStyle}>{t("fields.restaurantEmail")}</label>
                 <input
                   value={form.email}
                   onChange={(e) => setField("email", e.target.value)}
@@ -234,7 +234,7 @@ export default function OnboardingPage() {
               </div>
 
               <div style={fieldStyle}>
-                <label style={labelStyle}>Restaurant phone</label>
+                <label style={labelStyle}>{t("fields.restaurantPhone")}</label>
                 <input
                   value={form.phone}
                   onChange={(e) => setField("phone", e.target.value)}
@@ -243,7 +243,7 @@ export default function OnboardingPage() {
               </div>
 
               <div style={fieldStyle}>
-                <label style={labelStyle}>Website</label>
+                <label style={labelStyle}>{t("fields.website")}</label>
                 <input
                   value={form.website}
                   onChange={(e) => setField("website", e.target.value)}
@@ -253,7 +253,7 @@ export default function OnboardingPage() {
             </div>
 
             <div style={fieldStyle}>
-              <label style={labelStyle}>Description</label>
+              <label style={labelStyle}>{t("fields.description")}</label>
               <textarea
                 value={form.description}
                 onChange={(e) => setField("description", e.target.value)}
@@ -263,10 +263,10 @@ export default function OnboardingPage() {
           </section>
 
           <section style={cardStyle}>
-            <div style={sectionTitleStyle}>Main branch</div>
+            <div style={sectionTitleStyle}>{t("sections.mainBranch")}</div>
             <div style={grid2Style}>
               <div style={fieldStyle}>
-                <label style={labelStyle}>Branch name</label>
+                <label style={labelStyle}>{t("fields.branchName")}</label>
                 <input
                   value={form.branchName}
                   onChange={(e) => setField("branchName", e.target.value)}
@@ -275,7 +275,7 @@ export default function OnboardingPage() {
               </div>
 
               <div style={fieldStyle}>
-                <label style={labelStyle}>Branch code</label>
+                <label style={labelStyle}>{t("fields.branchCode")}</label>
                 <input
                   value={form.branchCode}
                   onChange={(e) => setField("branchCode", e.target.value.toUpperCase())}
@@ -284,7 +284,7 @@ export default function OnboardingPage() {
               </div>
 
               <div style={fieldStyle}>
-                <label style={labelStyle}>Address line 1</label>
+                <label style={labelStyle}>{t("fields.addressLine1")}</label>
                 <input
                   value={form.addressLine1}
                   onChange={(e) => setField("addressLine1", e.target.value)}
@@ -293,7 +293,7 @@ export default function OnboardingPage() {
               </div>
 
               <div style={fieldStyle}>
-                <label style={labelStyle}>Address line 2</label>
+                <label style={labelStyle}>{t("fields.addressLine2")}</label>
                 <input
                   value={form.addressLine2}
                   onChange={(e) => setField("addressLine2", e.target.value)}
@@ -302,7 +302,7 @@ export default function OnboardingPage() {
               </div>
 
               <div style={fieldStyle}>
-                <label style={labelStyle}>City</label>
+                <label style={labelStyle}>{t("fields.city")}</label>
                 <input
                   value={form.city}
                   onChange={(e) => setField("city", e.target.value)}
@@ -311,7 +311,7 @@ export default function OnboardingPage() {
               </div>
 
               <div style={fieldStyle}>
-                <label style={labelStyle}>Postal code</label>
+                <label style={labelStyle}>{t("fields.postalCode")}</label>
                 <input
                   value={form.postalCode}
                   onChange={(e) => setField("postalCode", e.target.value)}
@@ -320,7 +320,7 @@ export default function OnboardingPage() {
               </div>
 
               <div style={fieldStyle}>
-                <label style={labelStyle}>Country</label>
+                <label style={labelStyle}>{t("fields.country")}</label>
                 <input
                   value={form.country}
                   onChange={(e) => setField("country", e.target.value)}
@@ -329,7 +329,7 @@ export default function OnboardingPage() {
               </div>
 
               <div style={fieldStyle}>
-                <label style={labelStyle}>Currency</label>
+                <label style={labelStyle}>{t("fields.currency")}</label>
                 <input
                   value={form.currency}
                   onChange={(e) => setField("currency", e.target.value)}
@@ -338,7 +338,7 @@ export default function OnboardingPage() {
               </div>
 
               <div style={fieldStyle}>
-                <label style={labelStyle}>Branch phone</label>
+                <label style={labelStyle}>{t("fields.branchPhone")}</label>
                 <input
                   value={form.branchPhone}
                   onChange={(e) => setField("branchPhone", e.target.value)}
@@ -347,7 +347,7 @@ export default function OnboardingPage() {
               </div>
 
               <div style={fieldStyle}>
-                <label style={labelStyle}>Branch email</label>
+                <label style={labelStyle}>{t("fields.branchEmail")}</label>
                 <input
                   value={form.branchEmail}
                   onChange={(e) => setField("branchEmail", e.target.value)}
@@ -358,10 +358,10 @@ export default function OnboardingPage() {
           </section>
 
           <section style={cardStyle}>
-            <div style={sectionTitleStyle}>Booking defaults</div>
+            <div style={sectionTitleStyle}>{t("sections.bookingDefaults")}</div>
             <div style={grid2Style}>
               <div style={fieldStyle}>
-                <label style={labelStyle}>Reservation duration (min)</label>
+                <label style={labelStyle}>{t("fields.reservationDuration")}</label>
                 <input
                   type="number"
                   value={form.defaultReservationDurationMin}
@@ -371,7 +371,7 @@ export default function OnboardingPage() {
               </div>
 
               <div style={fieldStyle}>
-                <label style={labelStyle}>Max party size</label>
+                <label style={labelStyle}>{t("fields.maxPartySize")}</label>
                 <input
                   type="number"
                   value={form.maxPartySize}
@@ -381,7 +381,7 @@ export default function OnboardingPage() {
               </div>
 
               <div style={fieldStyle}>
-                <label style={labelStyle}>Lead time (min)</label>
+                <label style={labelStyle}>{t("fields.leadTime")}</label>
                 <input
                   type="number"
                   value={form.reservationLeadTimeMin}
@@ -391,7 +391,7 @@ export default function OnboardingPage() {
               </div>
 
               <div style={fieldStyle}>
-                <label style={labelStyle}>Cutoff (min)</label>
+                <label style={labelStyle}>{t("fields.cutoff")}</label>
                 <input
                   type="number"
                   value={form.reservationCutoffMin}
@@ -408,7 +408,7 @@ export default function OnboardingPage() {
                   checked={form.allowOnlineBooking}
                   onChange={(e) => setField("allowOnlineBooking", e.target.checked)}
                 />
-                <span>Allow online booking</span>
+                <span>{t("toggles.allowOnlineBooking")}</span>
               </label>
 
               <label style={toggleStyle}>
@@ -417,7 +417,7 @@ export default function OnboardingPage() {
                   checked={form.allowWalkIns}
                   onChange={(e) => setField("allowWalkIns", e.target.checked)}
                 />
-                <span>Allow walk-ins</span>
+                <span>{t("toggles.allowWalkIns")}</span>
               </label>
 
               <label style={toggleStyle}>
@@ -426,7 +426,7 @@ export default function OnboardingPage() {
                   checked={form.allowPhoneReservations}
                   onChange={(e) => setField("allowPhoneReservations", e.target.checked)}
                 />
-                <span>Allow phone reservations</span>
+                <span>{t("toggles.allowPhoneReservations")}</span>
               </label>
 
               <label style={toggleStyle}>
@@ -435,7 +435,7 @@ export default function OnboardingPage() {
                   checked={form.requireGuestPhone}
                   onChange={(e) => setField("requireGuestPhone", e.target.checked)}
                 />
-                <span>Require guest phone</span>
+                <span>{t("toggles.requireGuestPhone")}</span>
               </label>
 
               <label style={toggleStyle}>
@@ -444,21 +444,20 @@ export default function OnboardingPage() {
                   checked={form.requireGuestEmail}
                   onChange={(e) => setField("requireGuestEmail", e.target.checked)}
                 />
-                <span>Require guest email</span>
+                <span>{t("toggles.requireGuestEmail")}</span>
               </label>
             </div>
 
             <div style={noteStyle}>
-              Default business hours will be created automatically for all 7 days.
-              The restaurant team can adjust opening days and hours later in Settings.
+              {t("note")}
             </div>
           </section>
 
           <section style={cardStyle}>
-            <div style={sectionTitleStyle}>First admin user</div>
+            <div style={sectionTitleStyle}>{t("sections.firstAdmin")}</div>
             <div style={grid2Style}>
               <div style={fieldStyle}>
-                <label style={labelStyle}>Admin full name</label>
+                <label style={labelStyle}>{t("fields.adminFullName")}</label>
                 <input
                   value={form.adminFullName}
                   onChange={(e) => setField("adminFullName", e.target.value)}
@@ -467,7 +466,7 @@ export default function OnboardingPage() {
               </div>
 
               <div style={fieldStyle}>
-                <label style={labelStyle}>Admin email</label>
+                <label style={labelStyle}>{t("fields.adminEmail")}</label>
                 <input
                   value={form.adminEmail}
                   onChange={(e) => setField("adminEmail", e.target.value)}
@@ -476,7 +475,7 @@ export default function OnboardingPage() {
               </div>
 
               <div style={{ ...fieldStyle, gridColumn: "1 / -1" }}>
-                <label style={labelStyle}>Admin password</label>
+                <label style={labelStyle}>{t("fields.adminPassword")}</label>
                 <input
                   type="password"
                   value={form.adminPassword}
@@ -489,7 +488,7 @@ export default function OnboardingPage() {
 
           <div style={actionsStyle}>
             <button type="submit" disabled={loading} style={buttonStyle}>
-              {loading ? "Creating..." : "Create tenant"}
+              {loading ? t("creating") : t("createTenant")}
             </button>
           </div>
         </form>

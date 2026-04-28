@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { ArrowLeft, CalendarDays, ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
   getCurrentContext,
   getReservations
@@ -74,9 +75,14 @@ function mapStatusTone(status: string) {
   }
 }
 
+function mapStatusLabel(status: string, statusLabels: Record<string, string>) {
+  return statusLabels[status] || status;
+}
+
 export default function ReservationsPage() {
   const params = useParams<{ locale?: string }>();
   const searchParams = useSearchParams();
+  const t = useTranslations("reservationsPage");
 
   const locale = String(params?.locale || "en");
   const initialDate = searchParams.get("date") || getTodayDateString();
@@ -86,31 +92,34 @@ export default function ReservationsPage() {
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
-  const labels = useMemo(() => {
-    const isDe = locale === "de";
-
-    return {
-      reservations: isDe ? "Reservierungen" : "Reservations",
-      back: isDe ? "Zurueck zum Dashboard" : "Back to dashboard",
-      title: isDe ? "Reservierungen" : "Reservations",
-      subtitle: isDe
-        ? "Live-Liste fuer den aktuell ausgewaehlten Tenant und Branch."
-        : "Live list for the currently selected tenant and branch.",
-      listTitle: isDe ? "Reservierungsliste" : "Reservation list",
-      date: isDe ? "Datum" : "Date",
-      apply: isDe ? "Anwenden" : "Apply",
-      totalLoaded: isDe ? "Geladen" : "Total loaded",
-      guest: isDe ? "Gast" : "Guest",
-      time: isDe ? "Zeit" : "Time",
-      party: isDe ? "Personen" : "Party",
-      table: isDe ? "Tisch" : "Table",
-      status: isDe ? "Status" : "Status",
-      noItems: isDe ? "Keine Reservierungen gefunden." : "No reservations found.",
-      missingContext: isDe
-        ? "Tenant oder Branch Context fehlt. Bitte erneut einloggen oder Context setzen."
-        : "Tenant or branch context missing. Login again or set tenant context."
-    };
-  }, [locale]);
+  const labels = {
+    breadcrumb: t("breadcrumb"),
+    backToDashboard: t("backToDashboard"),
+    title: t("title"),
+    subtitle: t("subtitle"),
+    listTitle: t("listTitle"),
+    date: t("date"),
+    apply: t("apply"),
+    totalLoaded: t("totalLoaded"),
+    guest: t("guest"),
+    time: t("time"),
+    party: t("party"),
+    table: t("table"),
+    status: t("status"),
+    noItems: t("noItems"),
+    missingContext: t("missingContext"),
+    loadError: t("loadError"),
+    loading: t("loading"),
+    statusLabels: {
+      PENDING: t("statusLabels.PENDING"),
+      CONFIRMED: t("statusLabels.CONFIRMED"),
+      SEATED: t("statusLabels.SEATED"),
+      COMPLETED: t("statusLabels.COMPLETED"),
+      CANCELLED: t("statusLabels.CANCELLED"),
+      NO_SHOW: t("statusLabels.NO_SHOW"),
+      WAITLISTED: t("statusLabels.WAITLISTED")
+    }
+  };
 
   async function loadReservations(dateValue: string) {
     try {
@@ -135,7 +144,7 @@ export default function ReservationsPage() {
 
       setItems(Array.isArray((response as any)?.items) ? (response as any).items : []);
     } catch (error: any) {
-      setErrorMessage(error?.message || "Failed to load reservations.");
+      setErrorMessage(error?.message || labels.loadError);
       setItems([]);
     } finally {
       setLoading(false);
@@ -155,7 +164,7 @@ export default function ReservationsPage() {
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/60">
                 <CalendarDays className="h-3.5 w-3.5" />
-                {labels.reservations}
+                {labels.breadcrumb}
               </div>
 
               <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white">
@@ -172,7 +181,7 @@ export default function ReservationsPage() {
               className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/15"
             >
               <ArrowLeft className="h-4 w-4" />
-              {labels.back}
+              {labels.backToDashboard}
             </Link>
           </div>
 
@@ -219,7 +228,7 @@ export default function ReservationsPage() {
 
             {loading ? (
               <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-5 text-sm text-white/60">
-                Loading reservations...
+                {labels.loading}
               </div>
             ) : (
               <div className="mt-6 overflow-hidden rounded-2xl border border-white/10">
@@ -254,7 +263,7 @@ export default function ReservationsPage() {
                           <td className="px-4 py-4">{mapTableName(item)}</td>
                           <td className="px-4 py-4">
                             <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs ${mapStatusTone(item.status)}`}>
-                              {item.status}
+                              {mapStatusLabel(item.status, labels.statusLabels)}
                             </span>
                           </td>
                         </tr>
@@ -270,7 +279,7 @@ export default function ReservationsPage() {
             href={`/${locale}/dashboard`}
             className="inline-flex items-center gap-2 text-sm text-white/50 transition hover:text-white"
           >
-            {labels.back}
+            {labels.backToDashboard}
             <ChevronRight className="h-4 w-4" />
           </Link>
         </div>

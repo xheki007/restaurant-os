@@ -62,6 +62,97 @@ type SelectedTableSheet = {
   branchId?: string;
   partySize?: number;
 } | null;
+type LiveFloorLocale = "de" | "en" | "it" | "sq";
+
+type LiveFloorLabels = {
+  title: string;
+  active: string;
+  date: string;
+  seated: string;
+  reserved: string;
+  pending: string;
+  free: string;
+  reservedGuest: string;
+  noReservation: string;
+  zone: string;
+};
+
+function getBrowserLocale(): LiveFloorLocale {
+  if (typeof window === "undefined") {
+    return "de";
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const fromQuery = params.get("locale");
+  const fromStorage = window.localStorage.getItem("managerLocale");
+  const value = fromQuery || fromStorage || "de";
+
+  if (value === "en" || value === "it" || value === "sq" || value === "de") {
+    return value;
+  }
+
+  return "de";
+}
+
+function getLiveFloorLabels(locale: LiveFloorLocale): LiveFloorLabels {
+  if (locale === "sq") {
+    return {
+      title: "Salla live",
+      active: "Aktive",
+      date: "Data",
+      seated: "I ulur",
+      reserved: "Rezervuar",
+      pending: "Ne pritje",
+      free: "E lire",
+      reservedGuest: "Mysafir i rezervuar",
+      noReservation: "Pa rezervim",
+      zone: "Zona"
+    };
+  }
+
+  if (locale === "it") {
+    return {
+      title: "Sala live",
+      active: "Attivi",
+      date: "Data",
+      seated: "Seduto",
+      reserved: "Riservato",
+      pending: "In attesa",
+      free: "Libero",
+      reservedGuest: "Ospite prenotato",
+      noReservation: "Nessuna prenotazione",
+      zone: "Zona"
+    };
+  }
+
+  if (locale === "en") {
+    return {
+      title: "Live Floor",
+      active: "Active",
+      date: "Date",
+      seated: "Seated",
+      reserved: "Reserved",
+      pending: "Pending",
+      free: "Free",
+      reservedGuest: "Reserved guest",
+      noReservation: "No reservation",
+      zone: "Zone"
+    };
+  }
+
+  return {
+    title: "Live-Saal",
+    active: "Aktiv",
+    date: "Datum",
+    seated: "Platziert",
+    reserved: "Reserviert",
+    pending: "Ausstehend",
+    free: "Frei",
+    reservedGuest: "Reservierter Gast",
+    noReservation: "Keine Reservierung",
+    zone: "Zone"
+  };
+}
 
 function getTodayDateString() {
   const d = new Date();
@@ -123,11 +214,11 @@ function getActiveStatus(value: any) {
   return null;
 }
 
-function getStatusLabel(value?: string) {
-  if (value === "SEATED") return "Seated";
-  if (value === "CONFIRMED") return "Reserved";
-  if (value === "PENDING") return "Pending";
-  return "Free";
+function getStatusLabel(value: string | undefined, labels: LiveFloorLabels) {
+  if (value === "SEATED") return labels.seated;
+  if (value === "CONFIRMED") return labels.reserved;
+  if (value === "PENDING") return labels.pending;
+  return labels.free;
 }
 
 function getStatusVisual(value?: string) {
@@ -167,7 +258,7 @@ function safeNumber(value: any, fallback: number) {
   return Number.isFinite(num) ? num : fallback;
 }
 
-function getShortGuestName(reservation: any) {
+function getShortGuestName(reservation: any, fallbackLabel: string) {
   const raw =
     reservation?.guest?.firstName ||
     reservation?.guestName ||
@@ -175,8 +266,13 @@ function getShortGuestName(reservation: any) {
     reservation?.guest?.fullName ||
     "";
 
-  return String(raw || "").trim() || "Reserved guest";
+  return String(raw || "").trim() || fallbackLabel;
 }
+
+type FloorPlanLiveViewProps = {
+  initialLocale?: LiveFloorLocale;
+  initialDate?: string;
+};
 
 function getTimeLabel(reservation: any) {
   const raw = reservation?.startAt || reservation?.reservationDate;
@@ -224,13 +320,16 @@ function buildTableLabel(table: TableItem, reservation: any, combinationEntry: a
   return table.code || table.name || "-";
 }
 
-export default function FloorPlanLiveView() {
-  const [zones, setZones] = useState<ZoneItem[]>([]);
+export default function FloorPlanLiveView({ initialLocale = "de", initialDate }: FloorPlanLiveViewProps) {
+  const locale = initialLocale;
+  const labels = useMemo(() => getLiveFloorLabels(locale), [locale]);
+
+const [zones, setZones] = useState<ZoneItem[]>([]);
   const [tables, setTables] = useState<TableItem[]>([]);
   const [combinations, setCombinations] = useState<any[]>([]);
   const [reservations, setReservations] = useState<any[]>([]);
   const [selectedTable, setSelectedTable] = useState<SelectedTableSheet>(null);
-  const [selectedDate, setSelectedDate] = useState(getTodayDateString());
+  const [selectedDate, setSelectedDate] = useState(initialDate || getTodayDateString());
 
   async function loadData() {
     const ctx = getCurrentContext();
@@ -454,7 +553,7 @@ export default function FloorPlanLiveView() {
 
 
   return (
-    <main className="p-6 text-white">
+    <main className="min-h-screen bg-[#020817] p-3 text-white sm:p-4 lg:p-6">
       <div
         style={{
           marginBottom: "16px",
@@ -466,8 +565,8 @@ export default function FloorPlanLiveView() {
         }}
       >
         <div>
-          <h1 className="mb-2 text-2xl font-bold">Live Floor</h1>
-          <div className="text-sm text-white/80">Active: {activeCount}</div>
+          <h1 className="mb-2 text-2xl font-bold">{labels.title}</h1>
+          <div className="text-sm text-white/80">{labels.active}: {activeCount}</div>
         </div>
 
         <div
@@ -475,9 +574,64 @@ export default function FloorPlanLiveView() {
             display: "grid",
             gap: "6px"
           }}
-        >
+        >          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-end",
+              gap: "6px",
+              marginBottom: "4px"
+            }}
+          >
+            <a
+              href={"/" + locale + "/dashboard"}
+              style={{
+                height: "30px",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: "10px",
+                border: "1px solid rgba(255,255,255,0.10)",
+                background: "rgba(255,255,255,0.10)",
+                color: "rgba(255,255,255,0.88)",
+                fontSize: "12px",
+                fontWeight: 800,
+                padding: "0 12px",
+                textDecoration: "none"
+              }}
+            >
+              Dashboard
+            </a>
+
+            {(["de", "en", "it", "sq"] as LiveFloorLocale[]).map((item) => (
+              <a
+                key={item}
+                href={"/floor-plan/live?locale=" + item + "&date=" + encodeURIComponent(selectedDate)}
+                onClick={() => {
+                  window.localStorage.setItem("managerLocale", item);
+                }}
+                style={{
+                  minWidth: "38px",
+                  height: "30px",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: "10px",
+                  border: "1px solid rgba(255,255,255,0.10)",
+                  background: item === locale ? "#ffffff" : "rgba(255,255,255,0.06)",
+                  color: item === locale ? "#020617" : "rgba(255,255,255,0.78)",
+                  fontSize: "12px",
+                  fontWeight: 800,
+                  textDecoration: "none"
+                }}
+              >
+                {item.toUpperCase()}
+              </a>
+            ))}
+          </div>
+
           <label style={{fontSize: "12px", color: "rgba(255,255,255,0.72)"}}>
-            Date
+            {labels.date}
           </label>
           <input
             type="date"
@@ -496,7 +650,17 @@ export default function FloorPlanLiveView() {
         </div>
       </div>
 
-      <div className="relative overflow-auto rounded-2xl bg-[#0b1220] p-3">
+      <div
+        className="relative rounded-2xl bg-[#0b1220] p-2 sm:p-3"
+        style={{
+          height: "calc(100vh - 150px)",
+          minHeight: "560px",
+          overflow: "auto",
+          WebkitOverflowScrolling: "touch",
+          touchAction: "pan-x pan-y",
+          overscrollBehavior: "contain"
+        }}
+      >
         <div
           style={{
             position: "relative",
@@ -562,7 +726,7 @@ export default function FloorPlanLiveView() {
                       background: palette.main
                     }}
                   />
-                  {zone.name || zone.code || "Zone"}
+                  {zone.name || zone.code || labels.zone}
                 </div>
               </div>
             );
@@ -608,7 +772,7 @@ if (isInCombination) {
     ...visual
   };
 }
-            const statusLabel = getStatusLabel(status || undefined);
+            const statusLabel = getStatusLabel(status || undefined, labels);
 
             return (
               <div
@@ -618,7 +782,7 @@ if (isInCombination) {
                     reservationId: reservation?.id,
                     tableId: table.id,
                     tableName: buildTableLabel(table, reservation, combinationEntry, tables),
-                    guestName: reservation ? getShortGuestName(reservation) : "No reservation",
+                    guestName: reservation ? getShortGuestName(reservation, labels.reservedGuest) : labels.noReservation,
                     time: reservation ? getTimeLabel(reservation) : "-",
                     status: status || "FREE",
                     branchId: table.branchId || fallbackBranchId || "",
@@ -683,6 +847,7 @@ if (isInCombination) {
         branchId={selectedTable?.branchId}
         selectedTableId={selectedTable?.tableId}
         partySize={selectedTable?.partySize}
+      locale={locale}
       />
     </main>
   );

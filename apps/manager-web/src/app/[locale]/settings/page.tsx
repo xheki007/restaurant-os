@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { getCurrentContext } from "@/lib/api";
 
 const API_BASE_URL = "http://localhost:3002";
@@ -113,13 +115,17 @@ function mapHoursToDays(hours: BranchSettingsResponse["businessHours"]): DayItem
 }
 
 export default function SettingsPage() {
+  const params = useParams<{ locale?: string }>();
+  const locale = String(params?.locale || "en");
+  const t = useTranslations("settingsPage");
+
   const [loading, setLoading] = useState(true);
   const [savingSettings, setSavingSettings] = useState(false);
   const [savingHours, setSavingHours] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  const [branchName, setBranchName] = useState("Main Branch");
+  const [branchName, setBranchName] = useState("");
   const [branchId, setBranchId] = useState("");
 
   const [form, setForm] = useState({
@@ -152,7 +158,7 @@ export default function SettingsPage() {
         const activeBranchId = String(ctx?.branchId || "").trim();
 
         if (!activeBranchId) {
-          throw new Error("Branch context missing. Login again or set tenant context.");
+          throw new Error(t("branchMissing"));
         }
 
         setBranchId(activeBranchId);
@@ -172,7 +178,7 @@ export default function SettingsPage() {
           return;
         }
 
-        setBranchName(data?.name || "Main Branch");
+        setBranchName(data?.name || t("mainBranch"));
 
         const settings = data?.settings || {};
 
@@ -194,7 +200,7 @@ export default function SettingsPage() {
         setDays(mapHoursToDays(data?.businessHours || []));
       } catch (error: any) {
         if (!cancelled) {
-          setErrorMessage(error?.message || "Failed to load settings.");
+          setErrorMessage(error?.message || t("loadError"));
         }
       } finally {
         if (!cancelled) {
@@ -226,6 +232,39 @@ export default function SettingsPage() {
     );
   }
 
+  function getDayLabel(dayOfWeek: number) {
+    switch (dayOfWeek) {
+      case 1:
+        return t("days.monday");
+      case 2:
+        return t("days.tuesday");
+      case 3:
+        return t("days.wednesday");
+      case 4:
+        return t("days.thursday");
+      case 5:
+        return t("days.friday");
+      case 6:
+        return t("days.saturday");
+      case 7:
+        return t("days.sunday");
+      default:
+        return String(dayOfWeek);
+    }
+  }
+
+  function getActiveShiftLabel(day: DayItem) {
+    if (day.isClosed) {
+      return t("closed");
+    }
+
+    const count = (day.shift1.enabled ? 1 : 0) + (day.shift2.enabled ? 1 : 0);
+    return t("activeShifts", { count });
+  }
+
+  function getServiceTypeLabel(serviceType: "LUNCH" | "DINNER") {
+    return serviceType === "DINNER" ? t("serviceTypes.dinner") : t("serviceTypes.lunch");
+  }
   async function saveSettings() {
     try {
       setSavingSettings(true);
@@ -251,7 +290,7 @@ export default function SettingsPage() {
       const activeBranchId = String(branchId || getCurrentContext()?.branchId || "").trim();
 
       if (!activeBranchId) {
-        throw new Error("Branch context missing. Login again or set tenant context.");
+        throw new Error(t("branchMissing"));
       }
 
       const response = await fetch(`${API_BASE_URL}/branches/${activeBranchId}/settings`, {
@@ -266,9 +305,9 @@ export default function SettingsPage() {
         throw new Error(await response.text());
       }
 
-      setSaveMessage("Booking settings saved.");
+      setSaveMessage(t("bookingSaved"));
     } catch (error: any) {
-      setErrorMessage(error?.message || "Failed to save booking settings.");
+      setErrorMessage(error?.message || t("bookingSaveFailed"));
     } finally {
       setSavingSettings(false);
     }
@@ -315,7 +354,7 @@ export default function SettingsPage() {
       const activeBranchId = String(branchId || getCurrentContext()?.branchId || "").trim();
 
       if (!activeBranchId) {
-        throw new Error("Branch context missing. Login again or set tenant context.");
+        throw new Error(t("branchMissing"));
       }
 
       const response = await fetch(`${API_BASE_URL}/branches/${activeBranchId}/business-hours`, {
@@ -330,9 +369,9 @@ export default function SettingsPage() {
         throw new Error(await response.text());
       }
 
-      setSaveMessage("Business hours saved.");
+      setSaveMessage(t("hoursSaved"));
     } catch (error: any) {
-      setErrorMessage(error?.message || "Failed to save business hours.");
+      setErrorMessage(error?.message || t("hoursSaveFailed"));
     } finally {
       setSavingHours(false);
     }
@@ -342,7 +381,7 @@ export default function SettingsPage() {
     return (
       <main style={pageStyle}>
         <div style={shellStyle}>
-          <div style={loadingCardStyle}>Loading settings...</div>
+          <div style={loadingCardStyle}>{t("loading")}</div>
         </div>
       </main>
     );
@@ -353,15 +392,15 @@ export default function SettingsPage() {
       <div style={shellStyle}>
         <div style={heroStyle}>
           <div>
-            <div style={eyebrowStyle}>Branch control center</div>
-            <h1 style={titleStyle}>Settings</h1>
+            <div style={eyebrowStyle}>{t("eyebrow")}</div>
+            <h1 style={titleStyle}>{t("title")}</h1>
             <p style={subtitleStyle}>
-              Manage reservation limits, booking policy and weekly operating hours for {branchName}.
+              {t("subtitle", { branchName: branchName || t("mainBranch") })}
             </p>
           </div>
 
-          <Link href="/en/dashboard" style={backButtonStyle}>
-            Back to dashboard
+          <Link href={`/${locale}/dashboard`} style={backButtonStyle}>
+            {t("backToDashboard")}
           </Link>
         </div>
 
@@ -370,22 +409,22 @@ export default function SettingsPage() {
 
         <div style={statsGridStyle}>
           <div style={statCardStyle}>
-            <div style={statLabelStyle}>Max guests / reservation</div>
+            <div style={statLabelStyle}>{t("stats.maxGuests")}</div>
             <div style={statValueStyle}>{form.maxPartySize}</div>
           </div>
 
           <div style={statCardStyle}>
-            <div style={statLabelStyle}>Daily online cap</div>
+            <div style={statLabelStyle}>{t("stats.dailyCap")}</div>
             <div style={statValueStyle}>{form.maxOnlineGuestsPerDay}</div>
           </div>
 
           <div style={statCardStyle}>
-            <div style={statLabelStyle}>Open days / week</div>
+            <div style={statLabelStyle}>{t("stats.openDays")}</div>
             <div style={statValueStyle}>{summary.openDays}</div>
           </div>
 
           <div style={statCardStyle}>
-            <div style={statLabelStyle}>Enabled shifts</div>
+            <div style={statLabelStyle}>{t("stats.enabledShifts")}</div>
             <div style={statValueStyle}>{summary.enabledShiftCount}</div>
           </div>
         </div>
@@ -394,16 +433,16 @@ export default function SettingsPage() {
           <section style={cardStyle}>
             <div style={sectionHeaderStyle}>
               <div>
-                <div style={sectionTitleStyle}>Booking policy</div>
+                <div style={sectionTitleStyle}>{t("bookingPolicy.title")}</div>
                 <div style={sectionSubtitleStyle}>
-                  Control reservation limits and online booking behavior.
+                  {t("bookingPolicy.subtitle")}
                 </div>
               </div>
             </div>
 
             <div style={formGridStyle}>
               <div style={fieldGroupStyle}>
-                <label style={labelStyle}>Max persons per reservation</label>
+                <label style={labelStyle}>{t("fields.maxPersons")}</label>
                 <input
                   type="number"
                   value={form.maxPartySize}
@@ -418,7 +457,7 @@ export default function SettingsPage() {
               </div>
 
               <div style={fieldGroupStyle}>
-                <label style={labelStyle}>Total restaurant capacity</label>
+                <label style={labelStyle}>{t("fields.totalCapacity")}</label>
                 <input
                   type="number"
                   value={form.totalSeatingCapacity}
@@ -433,7 +472,7 @@ export default function SettingsPage() {
               </div>
 
               <div style={fieldGroupStyle}>
-                <label style={labelStyle}>Max online guests per day</label>
+                <label style={labelStyle}>{t("fields.maxOnlineGuests")}</label>
                 <input
                   type="number"
                   value={form.maxOnlineGuestsPerDay}
@@ -447,7 +486,7 @@ export default function SettingsPage() {
                 />
               </div>
                           <div style={fieldGroupStyle}>
-                <label style={labelStyle}>Reservation duration (minutes)</label>
+                <label style={labelStyle}>{t("fields.duration")}</label>
                 <input
                   type="number"
                   value={form.defaultReservationDurationMin}
@@ -462,7 +501,7 @@ export default function SettingsPage() {
               </div>
 
               <div style={fieldGroupStyle}>
-                <label style={labelStyle}>Table turnover buffer (minutes)</label>
+                <label style={labelStyle}>{t("fields.turnover")}</label>
                 <input
                   type="number"
                   value={form.tableTurnoverBufferMin}
@@ -477,7 +516,7 @@ export default function SettingsPage() {
               </div>
 
               <div style={fieldGroupStyle}>
-                <label style={labelStyle}>Lead time for same-day booking (minutes)</label>
+                <label style={labelStyle}>{t("fields.leadTime")}</label>
                 <input
                   type="number"
                   value={form.reservationLeadTimeMin}
@@ -492,7 +531,7 @@ export default function SettingsPage() {
               </div>
 
               <div style={fieldGroupStyle}>
-                <label style={labelStyle}>Cutoff before selected time (minutes)</label>
+                <label style={labelStyle}>{t("fields.cutoff")}</label>
                 <input
                   type="number"
                   value={form.reservationCutoffMin}
@@ -510,8 +549,8 @@ export default function SettingsPage() {
             <div style={toggleStackStyle}>
               <div style={toggleRowStyle}>
                 <div>
-                  <div style={toggleTitleStyle}>Allow online booking</div>
-                  <div style={toggleHintStyle}>Enable or disable reservation widget access.</div>
+                  <div style={toggleTitleStyle}>{t("toggles.onlineTitle")}</div>
+                  <div style={toggleHintStyle}>{t("toggles.onlineHint")}</div>
                 </div>
                 <input
                   type="checkbox"
@@ -527,8 +566,8 @@ export default function SettingsPage() {
 
               <div style={toggleRowStyle}>
                 <div>
-                  <div style={toggleTitleStyle}>Allow walk-ins</div>
-                  <div style={toggleHintStyle}>Keep in-house walk-in flow enabled.</div>
+                  <div style={toggleTitleStyle}>{t("toggles.walkInsTitle")}</div>
+                  <div style={toggleHintStyle}>{t("toggles.walkInsHint")}</div>
                 </div>
                 <input
                   type="checkbox"
@@ -544,8 +583,8 @@ export default function SettingsPage() {
 
               <div style={toggleRowStyle}>
                 <div>
-                  <div style={toggleTitleStyle}>Allow phone reservations</div>
-                  <div style={toggleHintStyle}>Allow team to register reservations by phone.</div>
+                  <div style={toggleTitleStyle}>{t("toggles.phoneTitle")}</div>
+                  <div style={toggleHintStyle}>{t("toggles.phoneHint")}</div>
                 </div>
                 <input
                   type="checkbox"
@@ -561,8 +600,8 @@ export default function SettingsPage() {
 
               <div style={toggleRowStyle}>
                 <div>
-                  <div style={toggleTitleStyle}>Allow indoor online booking</div>
-                  <div style={toggleHintStyle}>Expose indoor capacity in online booking.</div>
+                  <div style={toggleTitleStyle}>{t("toggles.indoorTitle")}</div>
+                  <div style={toggleHintStyle}>{t("toggles.indoorHint")}</div>
                 </div>
                 <input
                   type="checkbox"
@@ -578,8 +617,8 @@ export default function SettingsPage() {
 
               <div style={toggleRowStyle}>
                 <div>
-                  <div style={toggleTitleStyle}>Allow terrace online booking</div>
-                  <div style={toggleHintStyle}>Enable or disable terrace for customer bookings.</div>
+                  <div style={toggleTitleStyle}>{t("toggles.terraceTitle")}</div>
+                  <div style={toggleHintStyle}>{t("toggles.terraceHint")}</div>
                 </div>
                 <input
                   type="checkbox"
@@ -601,7 +640,7 @@ export default function SettingsPage() {
                 disabled={savingSettings}
                 style={primaryButtonStyle}
               >
-                {savingSettings ? "Saving booking settings..." : "Save booking settings"}
+                {savingSettings ? t("savingBooking") : t("saveBooking")}
               </button>
             </div>
           </section>
@@ -609,9 +648,9 @@ export default function SettingsPage() {
           <section style={cardStyle}>
             <div style={sectionHeaderStyle}>
               <div>
-                <div style={sectionTitleStyle}>Weekly business hours</div>
+                <div style={sectionTitleStyle}>{t("weeklyHours.title")}</div>
                 <div style={sectionSubtitleStyle}>
-                  Configure up to 2 shifts per day. Ideal for lunch and dinner service.
+                  {t("weeklyHours.subtitle")}
                 </div>
               </div>
             </div>
@@ -621,11 +660,9 @@ export default function SettingsPage() {
                 <div key={day.dayOfWeek} style={dayCardStyle}>
                   <div style={dayHeaderStyle}>
                     <div>
-                      <div style={dayTitleStyle}>{day.label}</div>
+                      <div style={dayTitleStyle}>{getDayLabel(day.dayOfWeek)}</div>
                       <div style={dayMetaStyle}>
-                        {day.isClosed
-                          ? "Closed"
-                          : `${day.shift1.enabled ? 1 : 0 + (day.shift2.enabled ? 1 : 0)} active shift(s)`}
+                        {getActiveShiftLabel(day)}
                       </div>
                     </div>
 
@@ -640,7 +677,7 @@ export default function SettingsPage() {
                           }))
                         }
                       />
-                      <span>Open</span>
+                      <span>{t("open")}</span>
                     </label>
                   </div>
 
@@ -648,7 +685,7 @@ export default function SettingsPage() {
                     <div style={shiftGridStyle}>
                       <div style={shiftCardStyle}>
                         <div style={shiftHeaderStyle}>
-                          <div style={shiftTitleStyle}>Shift 1</div>
+                          <div style={shiftTitleStyle}>{t("shift1")}</div>
                           <label style={toggleInlineStyle}>
                             <input
                               type="checkbox"
@@ -663,7 +700,7 @@ export default function SettingsPage() {
                                 }))
                               }
                             />
-                            <span>Enabled</span>
+                            <span>{t("enabled")}</span>
                           </label>
                         </div>
 
@@ -681,8 +718,8 @@ export default function SettingsPage() {
                             }
                             style={inputStyle}
                           >
-                            <option value="LUNCH">Lunch</option>
-                            <option value="DINNER">Dinner</option>
+                            <option value="LUNCH">{getServiceTypeLabel("LUNCH")}</option>
+                            <option value="DINNER">{getServiceTypeLabel("DINNER")}</option>
                           </select>
 
                           <input
@@ -719,7 +756,7 @@ export default function SettingsPage() {
 
                       <div style={shiftCardStyle}>
                         <div style={shiftHeaderStyle}>
-                          <div style={shiftTitleStyle}>Shift 2</div>
+                          <div style={shiftTitleStyle}>{t("shift2")}</div>
                           <label style={toggleInlineStyle}>
                             <input
                               type="checkbox"
@@ -734,7 +771,7 @@ export default function SettingsPage() {
                                 }))
                               }
                             />
-                            <span>Enabled</span>
+                            <span>{t("enabled")}</span>
                           </label>
                         </div>
 
@@ -752,8 +789,8 @@ export default function SettingsPage() {
                             }
                             style={inputStyle}
                           >
-                            <option value="LUNCH">Lunch</option>
-                            <option value="DINNER">Dinner</option>
+                            <option value="LUNCH">{getServiceTypeLabel("LUNCH")}</option>
+                            <option value="DINNER">{getServiceTypeLabel("DINNER")}</option>
                           </select>
 
                           <input
@@ -800,7 +837,7 @@ export default function SettingsPage() {
                 disabled={savingHours}
                 style={primaryButtonStyle}
               >
-                {savingHours ? "Saving business hours..." : "Save business hours"}
+                {savingHours ? t("savingHours") : t("saveHours")}
               </button>
             </div>
           </section>

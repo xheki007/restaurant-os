@@ -8,6 +8,91 @@ import {
   getTableCombinations,
   getTables
 } from "@/lib/api";
+type WaiterLocale = "de" | "en" | "it" | "sq";
+
+function getWaiterLabels(locale: WaiterLocale) {
+  if (locale === "sq") {
+    return {
+      table: "Tavolina",
+      noReservation: "Pa rezervim",
+      change: "Ndrysho tavolinen / kombinimin",
+      neededSeats: "Ulese te nevojshme",
+      singleTables: "Tavolina te vetme",
+      allCombinations: "Te gjitha kombinimet e mundshme",
+      seats: "ulese",
+      noCombination: "Nuk u gjet kombinim valid per kete numer personash.",
+      savedCombinations: "Kombinime te ruajtura",
+      numberOfGuests: "Numri i mysafireve",
+      walkInHelp: "Sistemi do te startoje walk-in ne tavolinen e zgjedhur.",
+      seatGuest: "Ule mysafirin",
+      cancelReservation: "Anulo rezervimin",
+      freeTable: "Liro tavolinen",
+      startWalkIn: "Starto walk-in",
+      closeButton: "Mbyll"
+    };
+  }
+
+  if (locale === "it") {
+    return {
+      table: "Tavolo",
+      noReservation: "Nessuna prenotazione",
+      change: "Cambia tavolo / combinazione",
+      neededSeats: "Posti necessari",
+      singleTables: "Tavoli singoli",
+      allCombinations: "Tutte le combinazioni possibili",
+      seats: "posti",
+      noCombination: "Nessuna combinazione valida per questo numero di persone.",
+      savedCombinations: "Combinazioni salvate",
+      numberOfGuests: "Numero di ospiti",
+      walkInHelp: "Il sistema avviera un walk-in sul tavolo selezionato.",
+      seatGuest: "Fai sedere ospite",
+      cancelReservation: "Annulla prenotazione",
+      freeTable: "Libera tavolo",
+      startWalkIn: "Avvia walk-in",
+      closeButton: "Chiudi"
+    };
+  }
+
+  if (locale === "en") {
+    return {
+      table: "Table",
+      noReservation: "No reservation",
+      change: "Change table / combination",
+      neededSeats: "Needed seats",
+      singleTables: "Single tables",
+      allCombinations: "All possible table combinations",
+      seats: "seats",
+      noCombination: "No valid adjacent table combination found for this party size.",
+      savedCombinations: "Saved combinations",
+      numberOfGuests: "Number of guests",
+      walkInHelp: "System will start a walk-in on the selected table.",
+      seatGuest: "Seat guest",
+      cancelReservation: "Cancel reservation",
+      freeTable: "Free table",
+      startWalkIn: "Start walk-in",
+      closeButton: "Close"
+    };
+  }
+
+  return {
+    table: "Tisch",
+    noReservation: "Keine Reservierung",
+    change: "Tisch / Kombination wechseln",
+    neededSeats: "Benoetigte Plaetze",
+    singleTables: "Einzeltische",
+    allCombinations: "Alle moeglichen Tischkombinationen",
+    seats: "Plaetze",
+    noCombination: "Keine gueltige Kombination fuer diese Gruppengroesse gefunden.",
+    savedCombinations: "Gespeicherte Kombinationen",
+    numberOfGuests: "Anzahl Gaeste",
+    walkInHelp: "Das System startet einen Walk-in auf dem ausgewaehlten Tisch.",
+    seatGuest: "Gast platzieren",
+    cancelReservation: "Reservierung stornieren",
+    freeTable: "Tisch freigeben",
+    startWalkIn: "Walk-in starten",
+    closeButton: "Schliessen"
+  };
+}
 
 type Props = {
   open: boolean;
@@ -20,6 +105,7 @@ type Props = {
   branchId?: string;
   selectedTableId?: string;
   partySize?: number;
+  locale?: WaiterLocale;
 };
 
 type GeneratedCombination = {
@@ -41,13 +127,15 @@ export default function WaiterActionSheet({
   status,
   branchId,
   selectedTableId,
-  partySize
+  partySize,
+  locale = "de"
 }: Props) {
   const [loading, setLoading] = useState(false);
   const [walkInPartySize, setWalkInPartySize] = useState<number>(2);
   const [availableTables, setAvailableTables] = useState<any[]>([]);
   const [availableCombinations, setAvailableCombinations] = useState<any[]>([]);
   const [inlineMessage, setInlineMessage] = useState<string | null>(null);
+  const labels = useMemo(() => getWaiterLabels(locale), [locale]);
 
   useEffect(() => {
     if (!open) return;
@@ -268,11 +356,11 @@ export default function WaiterActionSheet({
     <div onClick={onClose} style={overlayStyle}>
       <div onClick={(event) => event.stopPropagation()} style={sheetStyle}>
         <div style={{ fontSize: "18px", fontWeight: 800 }}>
-          {tableName || "Table"}
+          {tableName || labels.table}
         </div>
 
         <div style={{ marginTop: "6px", opacity: 0.82 }}>
-          {guestName || "No reservation"}
+          {guestName || labels.noReservation}
         </div>
 
         <div style={{ marginTop: "6px", fontSize: "13px", opacity: 0.72 }}>
@@ -288,14 +376,14 @@ export default function WaiterActionSheet({
         {hasReservation ? (
           <div style={reassignBoxStyle}>
             <div style={{ fontWeight: 800, marginBottom: "8px" }}>
-              Change table / combination
+              {labels.change}
             </div>
 
             <div style={{ fontSize: "12px", opacity: 0.72 }}>
-              Needed seats: {neededSeats}
+              {labels.neededSeats}: {neededSeats}
             </div>
 
-            <div style={sectionTitleStyle}>Single tables</div>
+            <div style={sectionTitleStyle}>{labels.singleTables}</div>
             <div style={optionGridStyle}>
               {availableTables.map((table) => (
                 <button
@@ -312,7 +400,7 @@ export default function WaiterActionSheet({
             </div>
 
             <div style={sectionTitleStyle}>
-              All possible table combinations
+              {labels.allCombinations}
             </div>
 
             {generatedCombinations.length > 0 ? (
@@ -330,21 +418,21 @@ export default function WaiterActionSheet({
                       {option.name}
                     </span>
                     <span style={{ display: "block", fontSize: "11px", opacity: 0.75 }}>
-                      {option.capacity + " seats"}
+                      {option.capacity + " " + labels.seats}
                     </span>
                   </button>
                 ))}
               </div>
             ) : (
               <div style={emptyStateStyle}>
-                No valid adjacent table combination found for this party size.
+                {labels.noCombination}
               </div>
             )}
 
             {availableCombinations.length > 0 ? (
               <>
                 <div style={sectionTitleStyle}>
-                  Saved combinations
+                  {labels.savedCombinations}
                 </div>
 
                 <div style={optionGridStyle}>
@@ -366,7 +454,7 @@ export default function WaiterActionSheet({
         ) : (
           <div style={reassignBoxStyle}>
             <label htmlFor="walkin-party-size" style={{ fontSize: "13px", opacity: 0.78 }}>
-              Number of guests
+              {labels.numberOfGuests}
             </label>
 
             <input
@@ -381,7 +469,7 @@ export default function WaiterActionSheet({
             />
 
             <div style={{ fontSize: "12px", opacity: 0.6 }}>
-              System will start a walk-in on the selected table.
+              {labels.walkInHelp}
             </div>
           </div>
         )}
@@ -392,29 +480,29 @@ export default function WaiterActionSheet({
               {(normalizedStatus === "PENDING" || normalizedStatus === "CONFIRMED") && (
                 <>
                   <button type="button" style={primaryButtonStyle} disabled={loading} onClick={markSeated}>
-                    Seat guest
+                    {labels.seatGuest}
                   </button>
 
                   <button type="button" style={dangerButtonStyle} disabled={loading} onClick={cancelReservation}>
-                    Cancel reservation
+                    {labels.cancelReservation}
                   </button>
                 </>
               )}
 
               {normalizedStatus === "SEATED" && (
                 <button type="button" style={primaryButtonStyle} disabled={loading} onClick={markFree}>
-                  Free table
+                  {labels.freeTable}
                 </button>
               )}
             </>
           ) : (
             <button type="button" style={primaryButtonStyle} disabled={loading} onClick={startWalkIn}>
-              Start walk-in
+              {labels.startWalkIn}
             </button>
           )}
 
           <button type="button" style={secondaryButtonStyle} disabled={loading} onClick={onClose}>
-            Close
+            {labels.closeButton}
           </button>
         </div>
       </div>
@@ -587,18 +675,22 @@ const overlayStyle: React.CSSProperties = {
 
 const sheetStyle: React.CSSProperties = {
   position: "absolute",
-  left: 0,
-  right: 0,
-  bottom: 0,
-  maxHeight: "72vh",
+  left: "12px",
+  right: "12px",
+  bottom: "12px",
+  width: "calc(100% - 24px)",
+  maxWidth: "760px",
+  margin: "0 auto",
+  maxHeight: "78vh",
   overflowY: "auto",
   background: "#0b1220",
   color: "#ffffff",
-  borderTopLeftRadius: "20px",
-  borderTopRightRadius: "20px",
+  borderRadius: "22px",
   padding: "20px",
-  borderTop: "1px solid rgba(255,255,255,0.10)",
-  boxShadow: "0 -12px 30px rgba(0,0,0,0.28)"
+  border: "1px solid rgba(255,255,255,0.10)",
+  boxShadow: "0 -12px 40px rgba(0,0,0,0.38)",
+  WebkitOverflowScrolling: "touch",
+  overscrollBehavior: "contain"
 };
 
 const reassignBoxStyle: React.CSSProperties = {
@@ -622,7 +714,7 @@ const sectionTitleStyle: React.CSSProperties = {
 
 const optionGridStyle: React.CSSProperties = {
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))",
+  gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
   gap: "8px"
 };
 
@@ -639,6 +731,7 @@ const inputStyle: React.CSSProperties = {
 const actionsStyle: React.CSSProperties = {
   marginTop: "16px",
   display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
   gap: "10px"
 };
 

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Clock3 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { getCurrentContext, getReservations, type ReservationListItem } from "@/lib/api";
 
 type Props = {
@@ -71,90 +72,9 @@ function formatTime(value: string, locale: string) {
   }).format(date);
 }
 
-function labelsFor(locale: string) {
-  const isDe = locale === "de";
-  const isSq = locale === "sq";
-  const isIt = locale === "it";
-
-  if (isSq) {
-    return {
-      todayReservations: "Rezervimet sot",
-      occupiedTables: "Tavolina te zena",
-      expectedGuests: "Mysafire te pritur",
-      aiAlerts: "Njoftime AI",
-      warning: "Te dhenat e dashboard-it nuk u ngarkuan.",
-      pendingSubtitle: "ne pritje ne intervalin aktual",
-      confirmedSubtitle: "rezervime te konfirmuara",
-      seatedSubtitle: "rezervime te ulura",
-      cancelledSubtitle: "anulime ne intervalin aktual",
-      previewTitle: "Parashikimi i rezervimeve",
-      previewSubtitle: "Te dhena live per tenant-in aktual.",
-      noReservations: "Nuk ka rezervime per sot.",
-      guest: "Mysafiri",
-      time: "Koha",
-      party: "Persona",
-      table: "Tavolina",
-      status: "Statusi",
-      confirmed: "Konfirmuar",
-      pending: "Ne pritje",
-      guestsLabel: "mysafire",
-      viewAll: "Shiko te gjitha"
-    };
-  }
-
-  if (isIt) {
-    return {
-      todayReservations: "Prenotazioni oggi",
-      occupiedTables: "Tavoli occupati",
-      expectedGuests: "Ospiti attesi",
-      aiAlerts: "Avvisi AI",
-      warning: "I dati della dashboard non sono stati caricati.",
-      pendingSubtitle: "in attesa nell'intervallo attuale",
-      confirmedSubtitle: "prenotazioni confermate",
-      seatedSubtitle: "prenotazioni sedute",
-      cancelledSubtitle: "cancellazioni nell'intervallo attuale",
-      previewTitle: "Anteprima prenotazioni",
-      previewSubtitle: "Dati live per il tenant attuale.",
-      noReservations: "Nessuna prenotazione per oggi.",
-      guest: "Ospite",
-      time: "Ora",
-      party: "Persone",
-      table: "Tavolo",
-      status: "Stato",
-      confirmed: "Confermata",
-      pending: "In attesa",
-      guestsLabel: "ospiti",
-      viewAll: "Vedi tutto"
-    };
-  }
-
-  return {
-    todayReservations: isDe ? "Reservierungen heute" : "Reservations today",
-    occupiedTables: isDe ? "Belegte Tische" : "Occupied tables",
-    expectedGuests: isDe ? "Erwartete G\u00e4ste" : "Expected guests",
-    aiAlerts: isDe ? "KI-Hinweise" : "AI alerts",
-    warning: isDe ? "Dashboard-Daten konnten nicht geladen werden." : "Dashboard data could not be loaded.",
-    pendingSubtitle: isDe ? "ausstehend im aktuellen Zeitraum" : "pending in current range",
-    confirmedSubtitle: isDe ? "best\u00e4tigte Reservierungen" : "confirmed reservations",
-    seatedSubtitle: isDe ? "platzierte Reservierungen" : "seated reservations",
-    cancelledSubtitle: isDe ? "Stornierungen im aktuellen Zeitraum" : "cancellations in current range",
-    previewTitle: isDe ? "Reservierungsvorschau" : "Reservations preview",
-    previewSubtitle: isDe ? "Live-Daten f\u00fcr den aktuellen Tenant." : "Live data for the current tenant.",
-    noReservations: isDe ? "Keine Reservierungen f\u00fcr heute." : "No reservations for today.",
-    guest: isDe ? "Gast" : "Guest",
-    time: isDe ? "Zeit" : "Time",
-    party: isDe ? "Personen" : "Party",
-    table: isDe ? "Tisch" : "Table",
-    status: isDe ? "Status" : "Status",
-    confirmed: isDe ? "Best\u00e4tigt" : "Confirmed",
-    pending: isDe ? "Ausstehend" : "Pending",
-    guestsLabel: isDe ? "G\u00e4ste" : "guests",
-    viewAll: isDe ? "Alle anzeigen" : "View all"
-  };
-}
-
 export default function DashboardDataClient({ locale }: Props) {
-  const labels = useMemo(() => labelsFor(locale), [locale]);
+  const t = useTranslations("dashboardLive");
+
   const [items, setItems] = useState<ReservationListItem[]>([]);
   const [error, setError] = useState("");
 
@@ -190,12 +110,12 @@ export default function DashboardDataClient({ locale }: Props) {
         setError("");
       } catch (e: any) {
         setItems([]);
-        setError(e?.message || labels.warning);
+        setError(e?.message || t("warning"));
       }
     }
 
     load();
-  }, [labels.warning]);
+  }, [t]);
 
   const summary = useMemo(() => {
     return {
@@ -215,7 +135,7 @@ export default function DashboardDataClient({ locale }: Props) {
         item.confirmationCode;
 
       const time = formatTime(item.startAt || item.reservationDate || "", locale);
-      const guests = String(item.partySize) + " " + labels.guestsLabel;
+      const guests = String(item.partySize) + " " + t("guestsLabel");
       const table =
         item.assignedTable?.code ||
         item.assignedTable?.name ||
@@ -224,10 +144,14 @@ export default function DashboardDataClient({ locale }: Props) {
 
       const status =
         item.status === "CONFIRMED"
-          ? labels.confirmed
+          ? t("confirmed")
           : item.status === "PENDING"
-            ? labels.pending
-            : item.status;
+            ? t("pending")
+            : item.status === "SEATED"
+              ? t("seated")
+              : item.status === "CANCELLED"
+                ? t("cancelled")
+                : item.status;
 
       return {
         id: item.id,
@@ -238,36 +162,36 @@ export default function DashboardDataClient({ locale }: Props) {
         status
       };
     });
-  }, [items, labels.confirmed, labels.guestsLabel, labels.pending, locale]);
+  }, [items, locale, t]);
 
   return (
     <>
       {error ? (
         <div className="rounded-2xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm text-amber-100/80">
-          {labels.warning}
+          {t("warning")}
         </div>
       ) : null}
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          title={labels.todayReservations}
+          title={t("todayReservations")}
           value={String(summary.total)}
-          subtitle={String(summary.pending) + " " + labels.pendingSubtitle}
+          subtitle={String(summary.pending) + " " + t("pendingSubtitle")}
         />
         <StatCard
-          title={labels.occupiedTables}
+          title={t("occupiedTables")}
           value={String(summary.confirmed)}
-          subtitle={String(summary.confirmed) + " " + labels.confirmedSubtitle}
+          subtitle={String(summary.confirmed) + " " + t("confirmedSubtitle")}
         />
         <StatCard
-          title={labels.expectedGuests}
+          title={t("expectedGuests")}
           value={String(summary.seated)}
-          subtitle={String(summary.seated) + " " + labels.seatedSubtitle}
+          subtitle={String(summary.seated) + " " + t("seatedSubtitle")}
         />
         <StatCard
-          title={labels.aiAlerts}
+          title={t("aiAlerts")}
           value={String(summary.cancelled)}
-          subtitle={String(summary.cancelled) + " " + labels.cancelledSubtitle}
+          subtitle={String(summary.cancelled) + " " + t("cancelledSubtitle")}
         />
       </div>
 
@@ -275,10 +199,10 @@ export default function DashboardDataClient({ locale }: Props) {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-semibold text-white">
-              {labels.previewTitle}
+              {t("previewTitle")}
             </h2>
             <p className="mt-1 text-sm text-white/50">
-              {labels.previewSubtitle}
+              {t("previewSubtitle")}
             </p>
           </div>
 
@@ -286,21 +210,21 @@ export default function DashboardDataClient({ locale }: Props) {
             href={`/${locale}/reservations`}
             className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/75 transition hover:bg-white/10 hover:text-white"
           >
-            {labels.viewAll}
+            {t("viewAll")}
           </Link>
         </div>
 
         <div className="mt-5 hidden grid-cols-[1.2fr_0.8fr_0.7fr_0.7fr_0.8fr] gap-3 px-4 text-xs uppercase tracking-[0.18em] text-white/35 md:grid">
-          <div>{labels.guest}</div>
-          <div>{labels.time}</div>
-          <div>{labels.party}</div>
-          <div>{labels.table}</div>
-          <div>{labels.status}</div>
+          <div>{t("guest")}</div>
+          <div>{t("time")}</div>
+          <div>{t("party")}</div>
+          <div>{t("table")}</div>
+          <div>{t("status")}</div>
         </div>
 
         {previewRows.length === 0 ? (
           <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-white/60">
-            {labels.noReservations}
+            {t("noReservations")}
           </div>
         ) : (
           <div className="mt-3 space-y-3">

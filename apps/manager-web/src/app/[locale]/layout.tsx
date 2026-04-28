@@ -1,4 +1,3 @@
-import Link from "next/link";
 import {notFound} from "next/navigation";
 import {Bell, Globe, Search} from "lucide-react";
 import {NextIntlClientProvider} from "next-intl";
@@ -6,6 +5,7 @@ import {getMessages, getTranslations, setRequestLocale} from "next-intl/server";
 import {locales} from "@/i18n";
 import AuthGate from "@/components/auth/AuthGate";
 import LogoutButton from "@/components/auth/LogoutButton";
+import LocaleSwitcher from "@/components/LocaleSwitcher";
 
 type Props = {
   children: React.ReactNode;
@@ -51,7 +51,7 @@ export default async function LocaleLayout({children, params}: Props) {
               <div className="hidden min-w-[280px] flex-1 justify-center lg:flex">
                 <div className="flex w-full max-w-md items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/45">
                   <Search className="h-4 w-4" />
-                  <span>Search reservations, guests, tables...</span>
+                  <span>{t("header.searchPlaceholder")}</span>
                 </div>
               </div>
 
@@ -62,26 +62,12 @@ export default async function LocaleLayout({children, params}: Props) {
 
                 <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-3 py-2.5">
                   <Globe className="h-4 w-4 text-white/70" />
-                  <div className="flex items-center gap-1">
-                    {locales.map((item) => (
-                      <Link
-                        key={item}
-                        href={`/${item}`}
-                        className={`rounded-xl px-2.5 py-1 text-sm transition ${
-                          item === locale
-                            ? "bg-white text-black"
-                            : "text-white/75 hover:bg-white/10 hover:text-white"
-                        }`}
-                      >
-                        {item.toUpperCase()}
-                      </Link>
-                    ))}
-                  </div>
+                  <LocaleSwitcher locale={locale} />
                 </div>
 
                 <div className="hidden rounded-2xl border border-white/10 bg-white/5 px-3 py-2.5 lg:block">
-                  <p className="text-xs text-white/45">Branch</p>
-                  <p className="text-sm font-medium text-white">Main Branch</p>
+                  <p className="text-xs text-white/45">{t("header.branchLabel")}</p>
+                  <p className="text-sm font-medium text-white">{t("header.mainBranch")}</p>
                 </div>
 
                 <LogoutButton />

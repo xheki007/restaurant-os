@@ -155,12 +155,262 @@ function normalizeColor(value?: string) {
   return match || COLOR_OPTIONS[0];
 }
 
+
+type EditorLocale = "de" | "en" | "it" | "sq";
+
+type FloorPlanEditorProps = {
+  initialLocale?: EditorLocale;
+};
+
+function getEditorLabels(locale: EditorLocale) {
+  if (locale === "sq") {
+    return {
+      description: "Krijo zona, shto tavolina, etiketa dhe nderto planin e restorantit direkt nga dashboard-i.",
+      addZone: "Shto zone",
+      selectedZone: "Zona e zgjedhur",
+      addLabel: "Shto etikete",
+      selectedLabel: "Etiketa e zgjedhur",
+      addTable: "Shto tavoline",
+      selectedTable: "Tavolina e zgjedhur",
+      zoneName: "Emri i zones",
+      zoneCode: "Kodi i zones",
+      zoneType: "Tipi i zones",
+      color: "Ngjyra",
+      name: "Emri",
+      code: "Kodi",
+      type: "Tipi",
+      text: "Teksti",
+      textColor: "Ngjyra e tekstit",
+      fontSize: "Madhesia e fontit",
+      zone: "Zona",
+      tableName: "Emri i tavolines",
+      tableCode: "Kodi i tavolines",
+      shape: "Forma",
+      round: "Rrumbullake",
+      square: "Katrore",
+      rectangle: "Drejtkendeshe",
+      min: "Min",
+      max: "Max",
+      minCapacity: "Kapaciteti min",
+      maxCapacity: "Kapaciteti max",
+      width: "Gjeresia",
+      height: "Lartesia",
+      saving: "Duke ruajtur...",
+      createZone: "Krijo zone",
+      updateZone: "Perditeso zonen",
+      deleteZone: "Fshij zonen e zgjedhur",
+      createLabel: "Krijo etikete",
+      updateLabel: "Perditeso etiketen",
+      deleteLabel: "Fshij etiketen e zgjedhur",
+      createTable: "Krijo tavoline",
+      updateTable: "Perditeso detajet e tavolines",
+      deleteTable: "Fshij tavolinen e zgjedhur",
+      indoor: "Brenda",
+      terrace: "Terrase",
+      privateRoom: "Dhome private",
+      noZone: "Pa zone"
+    };
+  }
+
+  if (locale === "it") {
+    return {
+      description: "Crea zone, aggiungi tavoli, etichette e costruisci la sala del ristorante direttamente dalla dashboard.",
+      addZone: "Aggiungi zona",
+      selectedZone: "Zona selezionata",
+      addLabel: "Aggiungi etichetta",
+      selectedLabel: "Etichetta selezionata",
+      addTable: "Aggiungi tavolo",
+      selectedTable: "Tavolo selezionato",
+      zoneName: "Nome zona",
+      zoneCode: "Codice zona",
+      zoneType: "Tipo zona",
+      color: "Colore",
+      name: "Nome",
+      code: "Codice",
+      type: "Tipo",
+      text: "Testo",
+      textColor: "Colore testo",
+      fontSize: "Dimensione font",
+      zone: "Zona",
+      tableName: "Nome tavolo",
+      tableCode: "Codice tavolo",
+      shape: "Forma",
+      round: "Rotondo",
+      square: "Quadrato",
+      rectangle: "Rettangolo",
+      min: "Min",
+      max: "Max",
+      minCapacity: "Capacita min",
+      maxCapacity: "Capacita max",
+      width: "Larghezza",
+      height: "Altezza",
+      saving: "Salvataggio...",
+      createZone: "Crea zona",
+      updateZone: "Aggiorna zona",
+      deleteZone: "Elimina zona selezionata",
+      createLabel: "Crea etichetta",
+      updateLabel: "Aggiorna etichetta",
+      deleteLabel: "Elimina etichetta selezionata",
+      createTable: "Crea tavolo",
+      updateTable: "Aggiorna dettagli tavolo",
+      deleteTable: "Elimina tavolo selezionato",
+      indoor: "Interno",
+      terrace: "Terrazza",
+      privateRoom: "Sala privata",
+      noZone: "Nessuna zona"
+    };
+  }
+
+  if (locale === "en") {
+    return {
+      description: "Create zones, add tables, labels, and build the restaurant layout directly from the dashboard.",
+      addZone: "Add zone",
+      selectedZone: "Selected zone",
+      addLabel: "Add label",
+      selectedLabel: "Selected label",
+      addTable: "Add table",
+      selectedTable: "Selected table",
+      zoneName: "Zone name",
+      zoneCode: "Zone code",
+      zoneType: "Zone type",
+      color: "Color",
+      name: "Name",
+      code: "Code",
+      type: "Type",
+      text: "Text",
+      textColor: "Text color",
+      fontSize: "Font size",
+      zone: "Zone",
+      tableName: "Table name",
+      tableCode: "Table code",
+      shape: "Shape",
+      round: "Round",
+      square: "Square",
+      rectangle: "Rectangle",
+      min: "Min",
+      max: "Max",
+      minCapacity: "Min capacity",
+      maxCapacity: "Max capacity",
+      width: "Width",
+      height: "Height",
+      saving: "Saving...",
+      createZone: "Create zone",
+      updateZone: "Update zone",
+      deleteZone: "Delete selected zone",
+      createLabel: "Create label",
+      updateLabel: "Update label",
+      deleteLabel: "Delete selected label",
+      createTable: "Create table",
+      updateTable: "Update table details",
+      deleteTable: "Delete selected table",
+      indoor: "Indoor",
+      terrace: "Terrace",
+      privateRoom: "Private room",
+      noZone: "No zone"
+    };
+  }
+
+  return {
+    description: "Zonen erstellen, Tische und Beschriftungen hinzufuegen und den Restaurantplan direkt im Dashboard bauen.",
+    addZone: "Zone hinzufuegen",
+    selectedZone: "Ausgewaehlte Zone",
+    addLabel: "Beschriftung hinzufuegen",
+    selectedLabel: "Ausgewaehlte Beschriftung",
+    addTable: "Tisch hinzufuegen",
+    selectedTable: "Ausgewaehlter Tisch",
+    zoneName: "Zonenname",
+    zoneCode: "Zonencode",
+    zoneType: "Zonentyp",
+    color: "Farbe",
+    name: "Name",
+    code: "Code",
+    type: "Typ",
+    text: "Text",
+    textColor: "Textfarbe",
+    fontSize: "Schriftgroesse",
+    zone: "Zone",
+    tableName: "Tischname",
+    tableCode: "Tischcode",
+    shape: "Form",
+    round: "Rund",
+    square: "Quadratisch",
+    rectangle: "Rechteckig",
+    min: "Min",
+    max: "Max",
+    minCapacity: "Min. Kapazitaet",
+    maxCapacity: "Max. Kapazitaet",
+    width: "Breite",
+    height: "Hoehe",
+    saving: "Speichern...",
+    createZone: "Zone erstellen",
+    updateZone: "Zone aktualisieren",
+    deleteZone: "Ausgewaehlte Zone loeschen",
+    createLabel: "Beschriftung erstellen",
+    updateLabel: "Beschriftung aktualisieren",
+    deleteLabel: "Ausgewaehlte Beschriftung loeschen",
+    createTable: "Tisch erstellen",
+    updateTable: "Tischdetails aktualisieren",
+    deleteTable: "Ausgewaehlten Tisch loeschen",
+    indoor: "Innenbereich",
+    terrace: "Terrasse",
+    privateRoom: "Privatraum",
+    noZone: "Keine Zone"
+  };
+}
+
+
+function getEditorChromeLabels(locale: EditorLocale) {
+  if (locale === "sq") {
+    return {
+      badge: "Editor i planit",
+      title: "Ndertuesi i planit te tavolinave",
+      backToDashboard: "Kthehu ne Dashboard",
+      canvasTitle: "Plani vizual",
+      tablesLoaded: "tavolina te ngarkuara",
+      guestLabel: "mysafire"
+    };
+  }
+
+  if (locale === "it") {
+    return {
+      badge: "Editor sala",
+      title: "Costruttore layout tavoli",
+      backToDashboard: "Torna alla Dashboard",
+      canvasTitle: "Canvas layout",
+      tablesLoaded: "tavoli caricati",
+      guestLabel: "ospiti"
+    };
+  }
+
+  if (locale === "en") {
+    return {
+      badge: "{chromeLabels.badge}",
+      title: "{chromeLabels.title}",
+      backToDashboard: "{chromeLabels.backToDashboard}",
+      canvasTitle: "Layout canvas",
+      tablesLoaded: "table(s) loaded",
+      guestLabel: "guests"
+    };
+  }
+
+  return {
+    badge: "Saalplan-Editor",
+    title: "Tischplan-Builder",
+    backToDashboard: "Zurueck zum Dashboard",
+    canvasTitle: "Layout-Flaeche",
+    tablesLoaded: "Tische geladen",
+    guestLabel: "Gaeste"
+  };
+}
+
 function isEditorVisibleCombination(combination: any) {
   const name = String(combination?.name || "").trim().toUpperCase();
   return !name.startsWith("AUTO:");
 }
 
-export default function FloorPlanEditor() {
+export default function FloorPlanEditor({ initialLocale = "de" }: FloorPlanEditorProps) {
+  const editorLabels = useMemo(() => getEditorLabels(initialLocale), [initialLocale]);
+  const chromeLabels = useMemo(() => getEditorChromeLabels(initialLocale), [initialLocale]);
   const [zones, setZones] = useState<ZoneItem[]>([]);
   const [tables, setTables] = useState<TableItem[]>([]);
   const [combinations, setCombinations] = useState<any[]>([]);
@@ -286,7 +536,7 @@ export default function FloorPlanEditor() {
 
       setZones(zoneRows);
       setTables(tableRows);
-      setCombinations((combinationRows || []).filter((combination: any) => isEditorVisibleCombination(combination)));
+      setCombinations([]);
       setLabels(labelRows);
 
       if (preserveSelectedZoneId) {
@@ -395,7 +645,7 @@ export default function FloorPlanEditor() {
     const subtitle =
       hoveredTable?.zone?.name ||
       hoveredTables[0]?.zone?.name ||
-      "No zone";
+      editorLabels.noZone;
 
     return {
       title,
@@ -1603,11 +1853,11 @@ export default function FloorPlanEditor() {
                 marginBottom: "14px"
               }}
             >
-              Floor Plan Editor
+              {chromeLabels.badge}
             </div>
 
             <h1 style={{ margin: 0, fontSize: "34px", lineHeight: 1.1 }}>
-              Table Layout Builder
+              {chromeLabels.title}
             </h1>
 
             <p
@@ -1619,8 +1869,7 @@ export default function FloorPlanEditor() {
                 lineHeight: 1.7
               }}
             >
-              Create zones, add tables, labels, and build the restaurant layout directly
-              from the dashboard.
+              {editorLabels.description}
             </p>
           </div>
 
@@ -1639,7 +1888,7 @@ export default function FloorPlanEditor() {
               fontWeight: 700
             }}
           >
-            Back to Dashboard
+            {chromeLabels.backToDashboard}
           </button>
         </div>
 
@@ -1676,10 +1925,10 @@ export default function FloorPlanEditor() {
               overflowY: "auto"
             }}
           >
-            <FloorPlanEditorSection openSection={openSection} setOpenSection={setOpenSection} id="zone" title="Add zone">
+            <FloorPlanEditorSection openSection={openSection} setOpenSection={setOpenSection} id="zone" title={editorLabels.addZone}>
               <div style={{ display: "grid", gap: "12px" }}>
                 <label style={{ display: "grid", gap: "6px" }}>
-                  <span>Zone name</span>
+                  <span>{editorLabels.zoneName}</span>
                   <input
                     value={zoneName}
                     onChange={(e) => setZoneName(e.target.value)}
@@ -1688,7 +1937,7 @@ export default function FloorPlanEditor() {
                 </label>
 
                 <label style={{ display: "grid", gap: "6px" }}>
-                  <span>Zone code</span>
+                  <span>{editorLabels.zoneCode}</span>
                   <input
                     value={zoneCode}
                     onChange={(e) => setZoneCode(e.target.value)}
@@ -1697,22 +1946,22 @@ export default function FloorPlanEditor() {
                 </label>
 
                 <label style={{ display: "grid", gap: "6px" }}>
-                  <span>Zone type</span>
+                  <span>{editorLabels.zoneType}</span>
                   <select
                     value={zoneType}
                     onChange={(e) => setZoneType(e.target.value)}
                     style={selectStyle}
                   >
-                    <option value="INDOOR" style={optionStyle}>Indoor</option>
-                    <option value="TERRACE" style={optionStyle}>Terrace</option>
+                    <option value="INDOOR" style={optionStyle}>{editorLabels.indoor}</option>
+                    <option value="TERRACE" style={optionStyle}>{editorLabels.terrace}</option>
                     <option value="VIP" style={optionStyle}>VIP</option>
                     <option value="BAR" style={optionStyle}>Bar</option>
-                    <option value="PRIVATE_ROOM" style={optionStyle}>Private room</option>
+                    <option value="PRIVATE_ROOM" style={optionStyle}>{editorLabels.privateRoom}</option>
                   </select>
                 </label>
 
                 <label style={{ display: "grid", gap: "6px" }}>
-                  <span>Color</span>
+                  <span>{editorLabels.color}</span>
                   <select
                     value={zoneColorName}
                     onChange={(e) => setZoneColorName(e.target.value)}
@@ -1731,16 +1980,16 @@ export default function FloorPlanEditor() {
                   disabled={saving || loading}
                   style={primaryButtonStyle}
                 >
-                  {saving ? "Saving..." : "Create zone"}
+                  {saving ? editorLabels.saving : editorLabels.createZone}
                 </button>
               </div>
             </FloorPlanEditorSection>
 
-            <FloorPlanEditorSection openSection={openSection} setOpenSection={setOpenSection} id="zone-selected" title="Selected zone">
+            <FloorPlanEditorSection openSection={openSection} setOpenSection={setOpenSection} id="zone-selected" title={editorLabels.selectedZone}>
               {selectedZone ? (
                 <div style={{ display: "grid", gap: "12px" }}>
                   <label style={{ display: "grid", gap: "6px" }}>
-                    <span>Name</span>
+                    <span>{editorLabels.name}</span>
                     <input
                       value={zoneName}
                       onChange={(e) => setZoneName(e.target.value)}
@@ -1749,7 +1998,7 @@ export default function FloorPlanEditor() {
                   </label>
 
                   <label style={{ display: "grid", gap: "6px" }}>
-                    <span>Code</span>
+                    <span>{editorLabels.code}</span>
                     <input
                       value={zoneCode}
                       onChange={(e) => setZoneCode(e.target.value)}
@@ -1758,22 +2007,22 @@ export default function FloorPlanEditor() {
                   </label>
 
                   <label style={{ display: "grid", gap: "6px" }}>
-                    <span>Type</span>
+                    <span>{editorLabels.type}</span>
                     <select
                       value={zoneType}
                       onChange={(e) => setZoneType(e.target.value)}
                       style={selectStyle}
                     >
-                      <option value="INDOOR" style={optionStyle}>Indoor</option>
-                      <option value="TERRACE" style={optionStyle}>Terrace</option>
+                      <option value="INDOOR" style={optionStyle}>{editorLabels.indoor}</option>
+                      <option value="TERRACE" style={optionStyle}>{editorLabels.terrace}</option>
                       <option value="VIP" style={optionStyle}>VIP</option>
                       <option value="BAR" style={optionStyle}>Bar</option>
-                      <option value="PRIVATE_ROOM" style={optionStyle}>Private room</option>
+                      <option value="PRIVATE_ROOM" style={optionStyle}>{editorLabels.privateRoom}</option>
                     </select>
                   </label>
 
                   <label style={{ display: "grid", gap: "6px" }}>
-                    <span>Color</span>
+                    <span>{editorLabels.color}</span>
                     <select
                       value={zoneColorName}
                       onChange={(e) => setZoneColorName(e.target.value)}
@@ -1799,7 +2048,7 @@ export default function FloorPlanEditor() {
                     disabled={saving}
                     style={primaryButtonStyle}
                   >
-                    {saving ? "Saving..." : "Update zone"}
+                    {saving ? editorLabels.saving : editorLabels.updateZone}
                   </button>
 
                   <button
@@ -1807,7 +2056,7 @@ export default function FloorPlanEditor() {
                     disabled={saving}
                     style={dangerButtonStyle}
                   >
-                    Delete selected zone
+                    {editorLabels.deleteZone}
                   </button>
                 </div>
               ) : (
@@ -1817,10 +2066,10 @@ export default function FloorPlanEditor() {
               )}
             </FloorPlanEditorSection>
 
-            <FloorPlanEditorSection openSection={openSection} setOpenSection={setOpenSection} id="label" title="Add label">
+            <FloorPlanEditorSection openSection={openSection} setOpenSection={setOpenSection} id="label" title={editorLabels.addLabel}>
               <div style={{ display: "grid", gap: "12px" }}>
                 <label style={{ display: "grid", gap: "6px" }}>
-                  <span>Text</span>
+                  <span>{editorLabels.text}</span>
                   <input
                     value={labelText}
                     onChange={(e) => setLabelText(e.target.value)}
@@ -1829,7 +2078,7 @@ export default function FloorPlanEditor() {
                 </label>
 
                 <label style={{ display: "grid", gap: "6px" }}>
-                  <span>Text color</span>
+                  <span>{editorLabels.textColor}</span>
                   <select
                     value={labelColorName}
                     onChange={(e) => setLabelColorName(e.target.value)}
@@ -1844,7 +2093,7 @@ export default function FloorPlanEditor() {
                 </label>
 
                 <label style={{ display: "grid", gap: "6px" }}>
-                  <span>Font size</span>
+                  <span>{editorLabels.fontSize}</span>
                   <input
                     value={labelFontSize}
                     onChange={(e) => setLabelFontSize(e.target.value)}
@@ -1857,16 +2106,16 @@ export default function FloorPlanEditor() {
                   disabled={saving || loading}
                   style={primaryButtonStyle}
                 >
-                  {saving ? "Saving..." : "Create label"}
+                  {saving ? editorLabels.saving : editorLabels.createLabel}
                 </button>
               </div>
             </FloorPlanEditorSection>
 
-            <FloorPlanEditorSection openSection={openSection} setOpenSection={setOpenSection} id="label-selected" title="Selected label">
+            <FloorPlanEditorSection openSection={openSection} setOpenSection={setOpenSection} id="label-selected" title={editorLabels.selectedLabel}>
               {selectedLabel ? (
                 <div style={{ display: "grid", gap: "12px" }}>
                   <label style={{ display: "grid", gap: "6px" }}>
-                    <span>Text</span>
+                    <span>{editorLabels.text}</span>
                     <input
                       value={labelText}
                       onChange={(e) => setLabelText(e.target.value)}
@@ -1875,7 +2124,7 @@ export default function FloorPlanEditor() {
                   </label>
 
                   <label style={{ display: "grid", gap: "6px" }}>
-                    <span>Text color</span>
+                    <span>{editorLabels.textColor}</span>
                     <select
                       value={labelColorName}
                       onChange={(e) => setLabelColorName(e.target.value)}
@@ -1890,7 +2139,7 @@ export default function FloorPlanEditor() {
                   </label>
 
                   <label style={{ display: "grid", gap: "6px" }}>
-                    <span>Font size</span>
+                    <span>{editorLabels.fontSize}</span>
                     <input
                       value={labelFontSize}
                       onChange={(e) => setLabelFontSize(e.target.value)}
@@ -1908,7 +2157,7 @@ export default function FloorPlanEditor() {
                     disabled={saving}
                     style={primaryButtonStyle}
                   >
-                    {saving ? "Saving..." : "Update label"}
+                    {saving ? editorLabels.saving : editorLabels.updateLabel}
                   </button>
 
                   <button
@@ -1916,7 +2165,7 @@ export default function FloorPlanEditor() {
                     disabled={saving}
                     style={dangerButtonStyle}
                   >
-                    Delete selected label
+                    {editorLabels.deleteLabel}
                   </button>
                 </div>
               ) : (
@@ -1926,10 +2175,10 @@ export default function FloorPlanEditor() {
               )}
             </FloorPlanEditorSection>
 
-            <FloorPlanEditorSection openSection={openSection} setOpenSection={setOpenSection} id="table" title="Add table">
+            <FloorPlanEditorSection openSection={openSection} setOpenSection={setOpenSection} id="table" title={editorLabels.addTable}>
               <div style={{ display: "grid", gap: "12px" }}>
                 <label style={{ display: "grid", gap: "6px" }}>
-                  <span>Zone</span>
+                  <span>{editorLabels.zone}</span>
                   <select
                     value={selectedZoneId}
                     onChange={(e) => setSelectedZoneId(e.target.value)}
@@ -1948,7 +2197,7 @@ export default function FloorPlanEditor() {
                 </label>
 
                 <label style={{ display: "grid", gap: "6px" }}>
-                  <span>Table name</span>
+                  <span>{editorLabels.tableName}</span>
                   <input
                     value={name}
                     onChange={(e) => setName(e.target.value)}
@@ -1957,7 +2206,7 @@ export default function FloorPlanEditor() {
                 </label>
 
                 <label style={{ display: "grid", gap: "6px" }}>
-                  <span>Table code</span>
+                  <span>{editorLabels.tableCode}</span>
                   <input
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
@@ -1966,15 +2215,15 @@ export default function FloorPlanEditor() {
                 </label>
 
                 <label style={{ display: "grid", gap: "6px" }}>
-                  <span>Shape</span>
+                  <span>{editorLabels.shape}</span>
                   <select
                     value={shape}
                     onChange={(e) => setShape(e.target.value)}
                     style={selectStyle}
                   >
-                    <option value="ROUND" style={optionStyle}>Round</option>
-                    <option value="SQUARE" style={optionStyle}>Square</option>
-                    <option value="RECTANGLE" style={optionStyle}>Rectangle</option>
+                    <option value="ROUND" style={optionStyle}>{editorLabels.round}</option>
+                    <option value="SQUARE" style={optionStyle}>{editorLabels.square}</option>
+                    <option value="RECTANGLE" style={optionStyle}>{editorLabels.rectangle}</option>
                   </select>
                 </label>
 
@@ -1986,7 +2235,7 @@ export default function FloorPlanEditor() {
                   }}
                 >
                   <label style={{ display: "grid", gap: "6px" }}>
-                    <span>Min</span>
+                    <span>{editorLabels.min}</span>
                     <input
                       value={capacityMin}
                       onChange={(e) => setCapacityMin(e.target.value)}
@@ -1995,7 +2244,7 @@ export default function FloorPlanEditor() {
                   </label>
 
                   <label style={{ display: "grid", gap: "6px" }}>
-                    <span>Max</span>
+                    <span>{editorLabels.max}</span>
                     <input
                       value={capacityMax}
                       onChange={(e) => setCapacityMax(e.target.value)}
@@ -2012,7 +2261,7 @@ export default function FloorPlanEditor() {
                   }}
                 >
                   <label style={{ display: "grid", gap: "6px" }}>
-                    <span>Width</span>
+                    <span>{editorLabels.width}</span>
                     <input
                       value={width}
                       onChange={(e) => setWidth(e.target.value)}
@@ -2021,7 +2270,7 @@ export default function FloorPlanEditor() {
                   </label>
 
                   <label style={{ display: "grid", gap: "6px" }}>
-                    <span>Height</span>
+                    <span>{editorLabels.height}</span>
                     <input
                       value={height}
                       onChange={(e) => setHeight(e.target.value)}
@@ -2035,16 +2284,16 @@ export default function FloorPlanEditor() {
                   disabled={saving || loading}
                   style={primaryButtonStyle}
                 >
-                  {saving ? "Saving..." : "Create table"}
+                  {saving ? editorLabels.saving : editorLabels.createTable}
                 </button>
               </div>
             </FloorPlanEditorSection>
 
-            <FloorPlanEditorSection openSection={openSection} setOpenSection={setOpenSection} id="table-selected" title="Selected table">
+            <FloorPlanEditorSection openSection={openSection} setOpenSection={setOpenSection} id="table-selected" title={editorLabels.selectedTable}>
               {selectedTable ? (
                 <div style={{ display: "grid", gap: "10px" }}>
                   <label style={{ display: "grid", gap: "6px" }}>
-                    <span>Table name</span>
+                    <span>{editorLabels.tableName}</span>
                     <input
                       value={name}
                       onChange={(e) => setName(e.target.value)}
@@ -2053,7 +2302,7 @@ export default function FloorPlanEditor() {
                   </label>
 
                   <label style={{ display: "grid", gap: "6px" }}>
-                    <span>Table code</span>
+                    <span>{editorLabels.tableCode}</span>
                     <input
                       value={code}
                       onChange={(e) => setCode(e.target.value)}
@@ -2062,15 +2311,15 @@ export default function FloorPlanEditor() {
                   </label>
 
                   <label style={{ display: "grid", gap: "6px" }}>
-                    <span>Shape</span>
+                    <span>{editorLabels.shape}</span>
                     <select
                       value={shape}
                       onChange={(e) => setShape(e.target.value)}
                       style={selectStyle}
                     >
-                      <option value="ROUND" style={optionStyle}>Round</option>
-                      <option value="SQUARE" style={optionStyle}>Square</option>
-                      <option value="RECTANGLE" style={optionStyle}>Rectangle</option>
+                      <option value="ROUND" style={optionStyle}>{editorLabels.round}</option>
+                      <option value="SQUARE" style={optionStyle}>{editorLabels.square}</option>
+                      <option value="RECTANGLE" style={optionStyle}>{editorLabels.rectangle}</option>
                     </select>
                   </label>
 
@@ -2082,7 +2331,7 @@ export default function FloorPlanEditor() {
                     }}
                   >
                     <label style={{ display: "grid", gap: "6px" }}>
-                      <span>Min capacity</span>
+                      <span>{editorLabels.minCapacity}</span>
                       <input
                         value={capacityMin}
                         onChange={(e) => setCapacityMin(e.target.value)}
@@ -2091,7 +2340,7 @@ export default function FloorPlanEditor() {
                     </label>
 
                     <label style={{ display: "grid", gap: "6px" }}>
-                      <span>Max capacity</span>
+                      <span>{editorLabels.maxCapacity}</span>
                       <input
                         value={capacityMax}
                         onChange={(e) => setCapacityMax(e.target.value)}
@@ -2108,7 +2357,7 @@ export default function FloorPlanEditor() {
                     }}
                   >
                     <label style={{ display: "grid", gap: "6px" }}>
-                      <span>Width</span>
+                      <span>{editorLabels.width}</span>
                       <input
                         value={width}
                         onChange={(e) => setWidth(e.target.value)}
@@ -2117,7 +2366,7 @@ export default function FloorPlanEditor() {
                     </label>
 
                     <label style={{ display: "grid", gap: "6px" }}>
-                      <span>Height</span>
+                      <span>{editorLabels.height}</span>
                       <input
                         value={height}
                         onChange={(e) => setHeight(e.target.value)}
@@ -2130,9 +2379,9 @@ export default function FloorPlanEditor() {
                     <div>
                       <strong>{selectedTable.code || selectedTable.name}</strong>
                     </div>
-                    <div>{selectedTable.zone?.name || "No zone"}</div>
+                    <div>{selectedTable.zone?.name || editorLabels.noZone}</div>
                     <div>
-                      {selectedTable.capacityMin}-{selectedTable.capacityMax} guests
+                      {selectedTable.capacityMin}-{selectedTable.capacityMax} {chromeLabels.guestLabel}
                     </div>
                     <div>
                       X: {selectedTable.posX} | Y: {selectedTable.posY}
@@ -2147,7 +2396,7 @@ export default function FloorPlanEditor() {
                     disabled={saving}
                     style={primaryButtonStyle}
                   >
-                    {saving ? "Saving..." : "Update table details"}
+                    {saving ? editorLabels.saving : editorLabels.updateTable}
                   </button>
 
                   <div
@@ -2215,7 +2464,7 @@ export default function FloorPlanEditor() {
                     disabled={saving}
                     style={dangerButtonStyle}
                   >
-                    Delete selected table
+                    {editorLabels.deleteTable}
                   </button>
                 </div>
               ) : (
@@ -2245,7 +2494,7 @@ export default function FloorPlanEditor() {
               }}
             >
               <div style={{ fontWeight: 700, fontSize: "18px" }}>
-                Layout canvas
+                {chromeLabels.canvasTitle}
               </div>
 
               <div
@@ -2254,7 +2503,7 @@ export default function FloorPlanEditor() {
                   fontSize: "13px"
                 }}
               >
-                {tables.length} table(s) loaded
+                {tables.length} {chromeLabels.tablesLoaded}
               </div>
             </div>
 
@@ -2492,7 +2741,7 @@ export default function FloorPlanEditor() {
                         renderTables.map((item) => item.code || item.name).join(" + "))
                     : (table.code || table.name);
 
-                  const zoneText = table.zone?.name || "No zone";
+                  const zoneText = table.zone?.name || editorLabels.noZone;
 
                   return (
                     <button
@@ -2598,6 +2847,68 @@ export default function FloorPlanEditor() {
             </div>
           </section>
         </div>
+      </div>
+    
+      <div
+        data-editor-language-switcher="true"
+        style={{
+          position: "fixed",
+          top: "24px",
+          right: "24px",
+          zIndex: 999,
+          display: "flex",
+          alignItems: "center",
+          gap: "6px",
+          padding: "6px",
+          borderRadius: "16px",
+          border: "1px solid rgba(255,255,255,0.10)",
+          background: "rgba(2,6,23,0.82)",
+          backdropFilter: "blur(12px)",
+          boxShadow: "0 12px 30px rgba(0,0,0,0.25)"
+        }}
+      >
+        <a
+          href={"/" + initialLocale + "/dashboard"}
+          style={{
+            height: "32px",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: "10px",
+            border: "1px solid rgba(255,255,255,0.10)",
+            background: "rgba(255,255,255,0.10)",
+            color: "rgba(255,255,255,0.92)",
+            fontSize: "12px",
+            fontWeight: 800,
+            padding: "0 12px",
+            textDecoration: "none"
+          }}
+        >
+          {chromeLabels.backToDashboard}
+        </a>
+
+        {(["de", "en", "it", "sq"] as EditorLocale[]).map((item) => (
+          <a
+            key={item}
+            href={"/floor-plan/editor?locale=" + item}
+            style={{
+              minWidth: "34px",
+              height: "32px",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: "10px",
+              border: "1px solid rgba(255,255,255,0.10)",
+              background: item === initialLocale ? "#ffffff" : "rgba(255,255,255,0.06)",
+              color: item === initialLocale ? "#020617" : "rgba(255,255,255,0.78)",
+              fontSize: "12px",
+              fontWeight: 900,
+              textDecoration: "none"
+            }}
+          >
+            {item.toUpperCase()}
+          </a>
+        ))}
       </div>
     </main>
   );
