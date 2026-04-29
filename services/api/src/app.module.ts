@@ -10,6 +10,7 @@ import { FloorPlansModule } from "./floor-plans/floor-plans.module";
 import { ZonesModule } from "./zones/zones.module";
 import { TablesModule } from "./tables/tables.module";
 import { AvailabilityModule } from "./availability/availability.module";
+import { AiModule } from "./ai/ai.module";
 import { GuestsModule } from "./guests/guests.module";
 import { ReservationsModule } from "./reservations/reservations.module";
 import { PublicBookingModule } from "./public-booking/public-booking.module";
@@ -38,6 +39,7 @@ import { ReviewModule } from "./review/review.module";
     ReservationsModule,
     GuestsModule,
     AvailabilityModule,
+    AiModule,
     TablesModule,
     TableCombinationsModule,
     ZonesModule,

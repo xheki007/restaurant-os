@@ -2,26 +2,29 @@
 
 import { useEffect } from "react";
 
-const allowedLocales = ["de", "en", "it", "sq"] as const;
-
-function getSafeLocale(value: string | null) {
-  if (value && allowedLocales.includes(value as (typeof allowedLocales)[number])) {
-    return value;
-  }
-
-  return "de";
-}
-
 export default function SetContextPage() {
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const locale = getSafeLocale(params.get("locale"));
+    localStorage.setItem("tenantId", "cmoivcmyq00010i6dwloahdi7");
+    localStorage.setItem("branchId", "cmoivcmz200030i6dt17uimwj");
 
-    localStorage.setItem("tenantId", "cmocvsx2r0000xsvlzty3goyo");
-    localStorage.setItem("branchId", "cmocvsx2v0002xsvlz7q2i5wy");
-
-    window.location.replace(`/${locale}/dashboard`);
+    window.location.href = "/sq/dashboard";
   }, []);
 
-  return null;
+  return (
+    <main style={{
+      minHeight: "100vh",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      background: "#020617",
+      color: "white",
+      fontFamily: "Arial, sans-serif"
+    }}>
+      <div>
+        <h1>Setting tenant context...</h1>
+        <p>Tenant: Restaurant Antica</p>
+        <p>Branch: Main Branch</p>
+      </div>
+    </main>
+  );
 }

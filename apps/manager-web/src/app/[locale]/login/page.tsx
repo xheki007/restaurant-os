@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { LockKeyhole, Mail, Building2, LogIn } from "lucide-react";
 
-const API_BASE_URL = "http://localhost:3002";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || "";
 
 export default function LocalizedLoginPage() {
   const router = useRouter();
@@ -13,9 +13,9 @@ export default function LocalizedLoginPage() {
   const locale = String(params?.locale || "de");
   const t = useTranslations("loginPage");
 
-  const [email, setEmail] = useState("manager@demo.com");
-  const [password, setPassword] = useState("Branch123!");
-  const [tenantSlug, setTenantSlug] = useState("demo-restaurant");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [tenantSlug, setTenantSlug] = useState(process.env.NEXT_PUBLIC_DEFAULT_TENANT_SLUG?.trim() || "");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 

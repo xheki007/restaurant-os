@@ -24,7 +24,7 @@ export type ReservationListItem = {
   } | null;
 };
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || "http://localhost:3002";
+  process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || "";
 
 const DEV_ACCESS_TOKEN =
   process.env.NEXT_PUBLIC_DEV_ACCESS_TOKEN?.trim() ||

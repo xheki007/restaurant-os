@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Restaurant OS Manager",
-  description: "Enterprise restaurant operations dashboard"
+  title: "Restaurant Antica Manager",
+  description: "Restaurant Antica operations dashboard"
 };
 
 export default function RootLayout({

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 
-const API_BASE_URL = "http://localhost:3002";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || "";
 
 export default function OnboardingPage() {
   const t = useTranslations("onboardingPage");

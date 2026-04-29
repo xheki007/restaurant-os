@@ -1,27 +1,47 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 type Props = {
   children: React.ReactNode;
 };
 
+function getLocaleFromPathname(pathname: string | null) {
+  const firstSegment = String(pathname || "")
+    .split("/")
+    .filter(Boolean)[0];
+
+  if (firstSegment === "de" || firstSegment === "en" || firstSegment === "it" || firstSegment === "sq") {
+    return firstSegment;
+  }
+
+  return "sq";
+}
+
 export default function AuthGate({ children }: Props) {
-  const router = useRouter();
   const pathname = usePathname();
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    const currentPath = String(pathname || "");
+    const isLoginRoute = currentPath.endsWith("/login");
+
+    if (isLoginRoute) {
+      setReady(true);
+      return;
+    }
+
     const token = localStorage.getItem("accessToken");
 
     if (!token) {
-      router.replace("/login");
+      const locale = getLocaleFromPathname(pathname);
+      window.location.replace("/" + locale + "/login");
       return;
     }
 
     setReady(true);
-  }, [router]);
+  }, [pathname]);
 
   if (!ready) {
     return (

@@ -1,10 +1,10 @@
 "use client";
 
-import { DEFAULT_LANG, t } from "@/lib/lang";
+import { DEFAULT_LANG, normalizeLang, t, type Lang } from "@/lib/lang";
 
 import { useEffect, useMemo, useState } from "react";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3002";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID || "";
 const BRANCH_ID = process.env.NEXT_PUBLIC_BRANCH_ID || "";
 const RESTAURANT_NAME = process.env.NEXT_PUBLIC_RESTAURANT_NAME || "Restaurant";
@@ -125,7 +125,12 @@ function getTodayDateString() {
 }
 
 export default function ReservePage() {
-  const lang = DEFAULT_LANG;
+  const [lang, setLang] = useState<Lang>(DEFAULT_LANG);
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    setLang(normalizeLang(searchParams.get("lang")));
+  }, []);
   const tr = t(lang);
   const [date, setDate] = useState(getTodayDateString());
   const [partySize, setPartySize] = useState("2");
@@ -181,6 +186,7 @@ export default function ReservePage() {
             const zone = item as Partial<Zone>;
 
             return (
+
               typeof zone.id === "string" &&
               typeof zone.tenantId === "string" &&
               typeof zone.branchId === "string" &&
@@ -258,7 +264,7 @@ export default function ReservePage() {
     async function loadAvailability() {
       try {
         if (!TENANT_ID || !BRANCH_ID) {
-          throw new Error("Booking widget tenant/branch context is missing.");
+          throw new Error(tr.contextMissing);
         }
 
         setLoadingAvailability(true);
@@ -299,7 +305,7 @@ export default function ReservePage() {
           if (error instanceof Error) {
             setAvailabilityError(error.message);
           } else {
-            setAvailabilityError("Failed to load availability.");
+            setAvailabilityError(tr.genericAvailabilityError);
           }
           setAvailability(null);
         }
@@ -321,23 +327,23 @@ export default function ReservePage() {
     event.preventDefault();
 
     if (!selectedTime) {
-      setSubmitError("Please choose an available time first.");
+      setSubmitError(tr.chooseTimeError);
       return;
     }
 
     if (!guestName.trim()) {
-      setSubmitError("Please enter your name.");
+      setSubmitError(tr.nameRequired);
       return;
     }
 
     if (!guestPhone.trim()) {
-      setSubmitError("Please enter your phone number.");
+      setSubmitError(tr.phoneRequired);
       return;
     }
 
     try {
       if (!TENANT_ID || !BRANCH_ID) {
-        throw new Error("Booking widget tenant/branch context is missing.");
+        throw new Error(tr.contextMissing);
       }
 
       setSubmitting(true);
@@ -358,7 +364,7 @@ export default function ReservePage() {
           partySize: Number(partySize),
           date,
           time: selectedTime,
-          preferredLanguage: "de",
+          preferredLanguage: lang,
           guestNote: guestNote.trim(),
           requestedZoneId: zoneId || undefined
         })
@@ -378,7 +384,7 @@ export default function ReservePage() {
       if (error instanceof Error) {
         setSubmitError(error.message);
       } else {
-        setSubmitError("Reservation could not be completed.");
+        setSubmitError(tr.submitFailed);
       }
     } finally {
       setSubmitting(false);
@@ -387,6 +393,60 @@ export default function ReservePage() {
 
   const lunchSlots = availability?.slots?.filter((s) => s.time < "17:00") || [];
   const dinnerSlots = availability?.slots?.filter((s) => s.time >= "17:00") || [];
+
+  const languageSwitch = (
+    <div
+      style={{
+        position: "fixed",
+        top: "92px",
+        right: "28px",
+        zIndex: 999999,
+        display: "flex",
+        gap: "8px",
+        padding: "8px",
+        borderRadius: "999px",
+        border: "1px solid rgba(255,255,255,0.18)",
+        background: "rgba(2,6,23,0.96)",
+        boxShadow: "0 18px 45px rgba(0,0,0,0.40)"
+      }}
+    >
+      <button
+        type="button"
+        onClick={() => setLang("de")}
+        style={{
+          border: "0",
+          background: lang === "de" ? "#ffffff" : "rgba(255,255,255,0.08)",
+          color: lang === "de" ? "#111111" : "#ffffff",
+          borderRadius: "999px",
+          padding: "10px 14px",
+          fontWeight: 900,
+          fontSize: "13px",
+          cursor: "pointer"
+        }}
+      >
+        DE
+      </button>
+
+      <button
+        type="button"
+        onClick={() => setLang("en")}
+        style={{
+          border: "0",
+          background: lang === "en" ? "#ffffff" : "rgba(255,255,255,0.08)",
+          color: lang === "en" ? "#111111" : "#ffffff",
+          borderRadius: "999px",
+          padding: "10px 14px",
+          fontWeight: 900,
+          fontSize: "13px",
+          cursor: "pointer"
+        }}
+      >
+        EN
+      </button>
+    </div>
+  );
+
+
 
   return (
     <main
@@ -398,6 +458,7 @@ export default function ReservePage() {
         fontFamily: "Arial, sans-serif"
       }}
     >
+      {languageSwitch}
       <div
         style={{
           maxWidth: "960px",
@@ -460,7 +521,7 @@ export default function ReservePage() {
               marginBottom: "16px"
             }}
           >
-            Online booking
+            {tr.booking}
           </div>
 
           <h1
@@ -470,7 +531,7 @@ export default function ReservePage() {
               lineHeight: 1.1
             }}
           >
-            Reserve your table
+            {tr.title}
           </h1>
 
           <p
@@ -483,8 +544,7 @@ export default function ReservePage() {
               color: "rgba(255,255,255,0.7)"
             }}
           >
-            Choose your date, time and party size. Available time slots are loaded
-            from the live reservation engine.
+            {tr.subtitle}
           </p>
         </section>
 
@@ -506,7 +566,7 @@ export default function ReservePage() {
             }}
           >
             <h2 style={{ marginTop: 0, marginBottom: "20px", fontSize: "22px" }}>
-              Booking details
+              {tr.bookingDetails}
             </h2>
 
             <div style={{ display: "grid", gap: "16px" }}>
@@ -578,7 +638,7 @@ export default function ReservePage() {
             >
               <div>
                 <h2 style={{ marginTop: 0, marginBottom: "8px", fontSize: "22px" }}>
-                  Available times
+                  {tr.availableTimes}
                 </h2>
                 <p
                   style={{
@@ -612,7 +672,7 @@ export default function ReservePage() {
                   color: "rgba(255,255,255,0.75)"
                 }}
               >
-                Loading live availability...
+                {tr.loadingAvailability}
               </div>
             ) : null}
 
@@ -664,7 +724,7 @@ export default function ReservePage() {
                     <>
   {lunchSlots.length > 0 && (
     <>
-      <div style={{gridColumn:"1/-1", opacity:0.6, marginBottom:"4px"}}>Lunch</div>
+      <div style={{gridColumn:"1/-1", opacity:0.6, marginBottom:"4px"}}>{tr.lunch}</div>
       {lunchSlots.map((slot) => {
         const isSelected = selectedTime === slot.time;
 
@@ -696,7 +756,7 @@ export default function ReservePage() {
 
   {dinnerSlots.length > 0 && (
     <>
-      <div style={{gridColumn:"1/-1", marginTop:"10px", opacity:0.6}}>Dinner</div>
+      <div style={{gridColumn:"1/-1", marginTop:"10px", opacity:0.6}}>{tr.dinner}</div>
       {dinnerSlots.map((slot) => {
         const isSelected = selectedTime === slot.time;
 

@@ -114,7 +114,7 @@ export default async function DashboardPage({ params }: Props) {
               </div>
 
               <div>
-                <p className="text-sm font-semibold text-white">Restaurant OS</p>
+                <p className="text-sm font-semibold text-white">Restaurant Antica</p>
                 <p className="text-xs text-white/45">{t("sidebar.managerWeb")}</p>
               </div>
             </div>
@@ -179,7 +179,7 @@ export default async function DashboardPage({ params }: Props) {
 
                 <div className="flex flex-wrap gap-3">
                   <a
-                    href={process.env.NEXT_PUBLIC_BOOKING_WIDGET_URL || "http://localhost:3001/reserve"}
+                    href={process.env.NEXT_PUBLIC_BOOKING_WIDGET_URL || "/"}
                     className="rounded-2xl bg-white px-5 py-3 text-sm font-medium text-black transition hover:opacity-90"
                   >
                     {t("actions.newReservation")}

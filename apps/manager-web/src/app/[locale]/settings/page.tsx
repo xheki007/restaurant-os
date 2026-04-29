@@ -6,7 +6,7 @@ import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { getCurrentContext } from "@/lib/api";
 
-const API_BASE_URL = "http://localhost:3002";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || "";
 
 
 type BranchSettingsResponse = {
@@ -92,21 +92,46 @@ function mapHoursToDays(hours: BranchSettingsResponse["businessHours"]): DayItem
 
     day.isClosed = false;
 
-    if (slots[0]) {
+    const lunchSlot = slots.find((item) => item.serviceType === "LUNCH");
+    const dinnerSlot = slots.find((item) => item.serviceType === "DINNER");
+
+    if (lunchSlot) {
       day.shift1 = {
         enabled: true,
-        openTime: slots[0].openTime,
-        closeTime: slots[0].closeTime,
-        serviceType: (slots[0].serviceType as "LUNCH" | "DINNER") || "LUNCH"
+        openTime: lunchSlot.openTime,
+        closeTime: lunchSlot.closeTime,
+        serviceType: "LUNCH"
       };
     }
 
-    if (slots[1]) {
+    if (dinnerSlot) {
       day.shift2 = {
         enabled: true,
-        openTime: slots[1].openTime,
-        closeTime: slots[1].closeTime,
-        serviceType: (slots[1].serviceType as "LUNCH" | "DINNER") || "DINNER"
+        openTime: dinnerSlot.openTime,
+        closeTime: dinnerSlot.closeTime,
+        serviceType: "DINNER"
+      };
+    }
+
+    const unknownSlots = slots.filter(
+      (item) => item.serviceType !== "LUNCH" && item.serviceType !== "DINNER"
+    );
+
+    if (!lunchSlot && unknownSlots[0]) {
+      day.shift1 = {
+        enabled: true,
+        openTime: unknownSlots[0].openTime,
+        closeTime: unknownSlots[0].closeTime,
+        serviceType: "LUNCH"
+      };
+    }
+
+    if (!dinnerSlot && unknownSlots[1]) {
+      day.shift2 = {
+        enabled: true,
+        openTime: unknownSlots[1].openTime,
+        closeTime: unknownSlots[1].closeTime,
+        serviceType: "DINNER"
       };
     }
   }

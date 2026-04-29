@@ -43,7 +43,7 @@ export default async function LocaleLayout({children, params}: Props) {
                 </div>
 
                 <div>
-                  <p className="text-sm font-semibold text-white">Restaurant OS</p>
+                  <p className="text-sm font-semibold text-white">Restaurant Antica</p>
                   <p className="text-xs text-white/45">{t("sidebar.managerWeb")}</p>
                 </div>
               </div>
